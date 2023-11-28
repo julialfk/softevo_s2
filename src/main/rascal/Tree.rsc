@@ -4,6 +4,7 @@ import IO;
 import lang::java::m3::AST;
 import Node;
 import Map;
+import Hash;
 
 // AST //
 public real getASTduplication(list[Declaration] ASTs, int clonetype) {
@@ -32,19 +33,20 @@ private real getASTtypeI(list[Declaration] ASTs) {
             case node n: {
                 if (arity(n) == 0) {
                     // leaves don't have subtrees, skip asap
-                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
+                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1, "node": hashNode(n)));
                 } else {
                     tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
-                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight));
+                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
                     hashedsubtrees += subtree.subtrees;
                 }
-                    println("<getKeywordParameters(n)>, ");
+                println(getKeywordParameters(n));
             }
         }
         unsetRec(ast);
     }
     return 0.0;
 }
+
 
 // Debug Scratch pad:
             // case node n: {
