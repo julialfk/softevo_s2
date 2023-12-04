@@ -5,6 +5,8 @@ import lang::java::m3::AST;
 import Node;
 import Map;
 import Hash;
+import List;
+import Type;
 
 // AST //
 public real getASTduplication(list[Declaration] ASTs, int clonetype) {
@@ -30,17 +32,30 @@ private real getASTtypeI(list[Declaration] ASTs) {
     list[str] hashedsubtrees = [];
     for (ast <- ASTs) {
         bottom-up visit(ast) {
-            case node n: {
-                if (arity(n) == 0) {
+            case node n => calcNode(n, 1)
+                // println(n);
+                // println(getChildren(n));
+                // println(size(getChildren(n)));
+                // tuple[str hash, map[list[str], int] subtrees] newParameters = calcNode(n, 1);
+                // n = setKeywordParameters(n, getKeywordParameters(n) + ("hash": newParameters.hash) + ("subtrees": newParameters.subtrees));
+                // println(getKeywordParameters(n));
+                // println(getKeywordParameters(n));
+                // if (arity(n) == 0) {
                     // leaves don't have subtrees, skip asap
-                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1, "node": hashNode(n)));
-                } else {
-                    tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
-                    n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
-                    hashedsubtrees += subtree.subtrees;
-                }
-                println(getKeywordParameters(n));
-            }
+                    // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
+                // } 
+                // else {
+                    // tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
+                    // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
+                    // hashedsubtrees += subtree.subtrees;
+                // }
+                // list[value] children = getChildren(n);
+                // if (size(children) != arity(n)) {
+                //     println("children = <size(children)>\n");
+                //     println("arity = <arity(n)>\n");
+                //     println(getKeywordParameters(n));
+                // }
+            
         }
         unsetRec(ast);
     }
