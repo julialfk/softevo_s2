@@ -14,7 +14,6 @@ public real getASTduplication(list[Declaration] ASTs, int clonetype) {
     switch (clonetype) {
         case 1: result = getASTtypeI(ASTs);
     }
-
     return result;
 }
 
@@ -43,7 +42,7 @@ private real getASTtypeI(list[Declaration] ASTs) {
                 // if (arity(n) == 0) {
                     // leaves don't have subtrees, skip asap
                     // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
-                // } 
+                // }
                 // else {
                     // tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
                     // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
@@ -55,13 +54,11 @@ private real getASTtypeI(list[Declaration] ASTs) {
                 //     println("arity = <arity(n)>\n");
                 //     println(getKeywordParameters(n));
                 // }
-            
         }
         unsetRec(ast);
     }
     return 0.0;
 }
-
 
 // Debug Scratch pad:
             // case node n: {
