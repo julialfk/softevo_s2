@@ -44,4 +44,6 @@ int countDuplicates(map[str, int] subtreeBucket, str hashedSubtree) {
         return subtreeBucket[hashedSubtree] + 1;
     }
     return 0;
+
+    // TODO: remove subtrees of current tree from counter.
 }

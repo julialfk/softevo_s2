@@ -14,6 +14,9 @@ import HashMapp;
 
 // Form subtrees from the parent node and all children's subtrees and
 // update the hashmap with every new subtree.
+// TODO: limit subtree search by only allowing the exclusion of children from
+// the parent node. All children of children should be included, since we do not
+// want variable nodes missing from a statement, for example.
 tuple[map[list[str] subtree, int weight] subtrees, map[str, map[str, int]] hm]
     getSubtrees(str parentHash, node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
     map[list[str], int] subtrees = ();
