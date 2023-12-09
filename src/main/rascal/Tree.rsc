@@ -27,11 +27,16 @@ public real getASTduplication(list[Declaration] ASTs, int clonetype) {
 // added to the map of all hashed subtrees, if it's already in the list
 // the value of the hashkey is then incremented(?)
 private real getASTtypeI(list[Declaration] ASTs) {
-    int massThreshold = 0;
-    list[str] hashedsubtrees = [];
+    int massThreshold = 5;
+    // list[str] hashedsubtrees = [];
+    map[str, map[str, int]] hm = ();
     for (ast <- ASTs) {
         bottom-up visit(ast) {
-            case node n => calcNode(n, 1)
+            case node n => {
+                tuple[node nNew, map[str, map[str, int]] hmNew] result = calcNode(n, 1, hm, massThreshold);
+                hm = result.hmNew;
+                result.nNew;
+            }
                 // println(n);
                 // println(getChildren(n));
                 // println(size(getChildren(n)));
@@ -57,6 +62,7 @@ private real getASTtypeI(list[Declaration] ASTs) {
         }
         unsetRec(ast);
     }
+    iprintln(hm);
     return 0.0;
 }
 
