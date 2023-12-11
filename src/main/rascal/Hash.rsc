@@ -15,12 +15,14 @@ import HashMapp;
 // Form subtrees from the parent node and all children's subtrees and
 // update the hashmap with every new subtree.
 // TODO: limit subtree search by only allowing the exclusion of children from
-// the parent node. All children of children should be included, since we do not
-// want variable nodes missing from a statement, for example.
+// the parent node. All children of children should be included,
+// since we do not want variable nodes missing from a statement,
+// or a missing statement from a block, for example.
 tuple[map[list[str] subtree, int weight] subtrees, map[str, map[str, int]] hm]
     getSubtrees(str parentHash, node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
     map[list[str], int] subtrees = ();
     list[value] children = getChildren(n);
+    // Keeps track of children that are nested in list parameters of a node.
     list[node] nestedChildren = [];
 
     for(child <- children) {
@@ -62,6 +64,77 @@ tuple[map[list[str] subtree, int weight] subtrees, map[str, map[str, int]] hm]
 
     return <subtrees, hm>;
 }
+
+
+// -----------------------------------------------------------
+
+// tuple[map[list[str] subtree, int weight] subtrees, map[str, map[str, int]] hm]
+//     getSubtrees2(str parentHash, node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
+//     map[list[str], int] subtrees = ();
+//     list[map[list[str], int]] subtreesChildren = [];
+//     list[value] children = getChildren(n);
+//     // Keeps track of children that are nested in list parameters of a node.
+//     list[node] nestedChildren = [];
+
+//     for(child <- children) {
+//         switch (child) {
+//             case list[value] c: { nestedChildren += c; }
+//             case node c: {
+//                 subtreesChildren += getSubtreesChild(c);
+//             }
+//         }
+//     }
+
+//     for (node child <- nestedChildren) { 
+//         subtreesChildren += getSubtreesChild(c);
+//     }
+
+//     return <subtrees, hm>;
+// }
+
+
+map[list[str] subtree, int weight] getSubtreesChild(node child) {
+    return(typeCast(#map[list[str], int], getKeywordParameters(child)["subtrees"]));
+}
+
+
+tuple[map[list[str] subtree, int weight] subtrees, map[str, map[str, int]] hm]
+    getSubtreesSingle(str parentHash, map[list[str], int] childTrees, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
+    map[list[str], int] subtrees = ();
+    for (treeKey <- domain(childTrees)) {
+        list[str] subtree = parentHash + treeKey;
+        int weight = childTrees[treeKey] + 1;
+        map[list[str], int] newEntry = (subtree: weight);
+        subtrees = subtrees + newEntry;
+        hm = updateHashMap(hm, <subtree, weight>, cloneType, massThreshold);
+    }
+
+    return <subtrees, hm>;
+}
+
+
+map[list[str] subtree, int weight] subsequences(str parentHash, list[map[list[str], int]] treeGroups) {
+    map[list[str], int] output = ([parentHash]:1);
+    // Get the subtrees per child.
+    for (map[list[str], int] childTrees <- treeGroups) {
+        map[list[str], int] outputTemp = ();
+        // For each of the previous generated output, make a new version with
+        // each subtree of this child.
+        for (list[str] childTreeKey <- domain(childTrees)) {
+            // Use the output generated from the previous iterations with the
+            // previous children as the prefix for the next output.
+            for (list[str] partialTree <- domain(output)) {
+                map[list[str], int] newEntry = (partialTree + childTreeKey: childTrees[childTreeKey] + output[partialTree]);
+                
+                outputTemp += newEntry;
+            }
+        }
+        output += outputTemp;
+    }
+
+    return output;
+}
+
 
 
 // Return the updated version of the node (with subtrees) and hashmap.
