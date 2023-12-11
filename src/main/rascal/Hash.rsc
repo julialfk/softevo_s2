@@ -27,6 +27,7 @@ tuple[tuple[list[str] tree, int weight] subtree, map[str, map[str, int]] hm]
 
     for(child <- children) {
         switch (child) {
+            // case list
             case list[value] c: nestedChildren += c;
             case node c: subtree = getSubtreeChild(c, subtree);
         }
@@ -46,18 +47,26 @@ tuple[list[str] subtree, int weight] getSubtreeChild(node child, tuple[list[str]
     return <subtree.tree + subtreeChild.subtree, subtree.weight + subtreeChild.weight>;
 }
 
-
-list[list[int]] partialSubsequences(list[int] lst) {
-    list[list[int]] result = [];
-    int len = size(lst);
+// Creates a subtree representation of partial code blocks with subsequent lines.
+// E.g. a block of 3 lines will be transformed into a list of blocks:
+// [[0],[0,1],[0,1,2],[1],[1,2],[2]]
+// The first nChildren can be combined with the first lines/children of the parent.
+tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren]
+    lineSubsequences(list[tuple[list[str] tree, int weight]] subtrees) {
+    list[tuple[list[str], int]] result = [];
+    int len = size(subtrees);
 
     for (int i <- [0..len]) {
         for (int j <- [i..len]) {
-            result += [lst[i..j+1]];
+            tuple[list[str] tree, int weight] nextSubtree = <[],0>;
+            for (tuple[list[str] tree, int weight] subtree <- subtrees[i..j+1]) {
+                nextSubtree = <nextSubtree.tree + subtree.tree, nextSubtree.weight + subtree.weight>;
+            }
+            result += [nextSubtree];
         }
     }
 
-    return result;
+    return <result, len>;
 }
 
 
@@ -122,7 +131,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
             hash = md5Hash(hashInput);
         }
         case \constructor(str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
-            hashInput = "constructor1parameters<size(parameters)>exceptions<size(exceptions)>impl<impl>";
+            hashInput = "constructor1parameters<size(parameters)>exceptions<size(exceptions)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
         }
