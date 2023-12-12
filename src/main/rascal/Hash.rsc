@@ -14,10 +14,6 @@ import HashMapp;
 
 // Form a subtree from the parent node and all children subtrees and
 // update the hashmap with the new subtree.
-// TODO: limit subtree search by only allowing the exclusion of children from
-// the parent node. All children of children should be included,
-// since we do not want variable nodes missing from a statement,
-// or a missing statement from a block, for example.
 tuple[tuple[list[str] tree, int weight] subtree, map[str, map[str, int]] hm]
     getSubtree(str parentHash, node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
     tuple[list[str] tree, int weight] subtree = <[parentHash],1>;
@@ -29,30 +25,50 @@ tuple[tuple[list[str] tree, int weight] subtree, map[str, map[str, int]] hm]
         switch (child) {
             // case list
             case list[value] c: nestedChildren += c;
-            case node c: subtree = getSubtreeChild(c, subtree);
+            case node c: subtree = updateSubtree(c, subtree);
         }
     }
-    for (node child <- nestedChildren) { subtree = getSubtreeChild(child, subtree); }
+    for (node child <- nestedChildren) { subtree = updateSubtree(child, subtree); }
 
     return <subtree, updateHashMap(hm, subtree, cloneType, massThreshold)>;
 }
 
 
 // Extract the subtree from the child and update the subtree of the parent with the child subtree.
-tuple[list[str] subtree, int weight] getSubtreeChild(node child, tuple[list[str] tree, int weight] subtree) {
-    childKeywords = getKeywordParameters(child);
-    if (childKeywords["hash"] == "") { return subtree; }
-    tuple[list[str] subtree, int weight] subtreeChild
-        = typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]);
+tuple[list[str] subtree, int weight] updateSubtree(node child, tuple[list[str] tree, int weight] subtree) {
+    // childKeywords = getKeywordParameters(child);
+    if (getKeywordParameters(child)["hash"] == "") { return subtree; }
+    tuple[list[str] subtree, int weight] subtreeChild = getChildTree(child);
     return <subtree.tree + subtreeChild.subtree, subtree.weight + subtreeChild.weight>;
 }
+
+
+// Extract the subtree from a child node's keyword paramaters.
+tuple[list[str] subtree, int weight] getChildTree(node child) {
+    return(typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]));
+}
+
+
+// Extract the subtrees from a block of code.
+list[tuple[list[str] tree, int weight]] getLines(list[value] lines) {
+    list[tuple[list[str], int]] subtrees = [];
+    for (node line <- lines) { subtrees += [getChildTree(line)]; }
+    return subtrees;
+}
+
 
 // Creates a subtree representation of partial code blocks with subsequent lines.
 // E.g. a block of 3 lines will be transformed into a list of blocks:
 // [[0],[0,1],[0,1,2],[1],[1,2],[2]]
 // The first nChildren can be combined with the first lines/children of the parent.
-tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren]
-    lineSubsequences(list[tuple[list[str] tree, int weight]] subtrees) {
+tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren, map[str, map[str, int]] hm]
+    lineSubsequences(list[value] lines,
+                        int cloneType,
+                        map[str, map[str, int]] hm,
+                        int massThreshold) {
+    list[tuple[list[str], int]] subtrees = [];
+    for (node line <- lines) { subtrees += [getChildTree(line)]; }
+
     list[tuple[list[str], int]] result = [];
     int len = size(subtrees);
 
@@ -63,10 +79,11 @@ tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren]
                 nextSubtree = <nextSubtree.tree + subtree.tree, nextSubtree.weight + subtree.weight>;
             }
             result += [nextSubtree];
+            hm = updateHashMap(hm, nextSubtree, cloneType, massThreshold);
         }
     }
 
-    return <result, len>;
+    return <result, len, hm>;
 }
 
 
@@ -76,7 +93,8 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
     // iprintln(n);
     str hashInput = "";
     str hash = "";
-    map[list[str], int] subtrees = ();
+    // map[list[str], int] subtrees = ();
+    list[value] lines = [];
     // For children that are not in list form, need to find a way to always include those in subtree.
     switch (n) {
         // Declarations
@@ -90,6 +108,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
             hashInput = "enum1implements<size(implements)>constants<size(constants)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \enumConstant(str name, list[Expression] arguments, Declaration class): {
             hashInput = "enumConstant1arguments<size(arguments)>";
@@ -105,14 +124,17 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
             hashInput = "class1extends<size(extends)>implements<size(implements)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \class(list[Declaration] body): {
             hash = md5Hash("class2body<size(body)>");
+            lines = body;
         }
         case \interface(str name, list[Type] extends, list[Type] implements, list[Declaration] body): {
             hashInput = "interface1extends<size(extends)>implements<size(implements)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \field(Type \type, list[Expression] fragments): {
             hash = md5Hash("field1fragments<size(fragments)>");
@@ -162,6 +184,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
             hashInput = "annotationType1body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \annotationTypeMember(Type \type, str name): {
             hashInput = "annotationTypeMember1";
@@ -338,6 +361,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
         }
         case \block(list[Statement] statements): {
             hash = md5Hash("block1statements<size(statements)>");
+            lines = statements;
         }
         case \break(): {
             hash = md5Hash("break1");
@@ -389,6 +413,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
         }
         case \switch(Expression expression, list[Statement] statements): {
             hash = md5Hash("switch1statements<size(statements)>");
+            lines = statements;
         }
         case \case(Expression expression): {
             hash = md5Hash("case1");
@@ -531,9 +556,15 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
         }
     }
 
+    // Also add subsequences within code blocks to the hash map.
+    if (!isEmpty(lines)) {
+        tuple[list[tuple[list[str], int]] subsequences, int nChildren, map[str, map[str, int]] hm] result
+            = lineSubsequences(lines, cloneType, hm, massThreshold);
+        hm = result.hm;
+    }
+
     tuple[tuple[list[str] subtree, int weight] subtree, map[str, map[str, int]] hm] treeAndMap
         = getSubtree(hash, n, cloneType, hm, massThreshold);
-    // subtrees = ([hash]:1) + treesAndMap.subtrees;
 
     // println("Hash:");
     // iprintln(hash);
@@ -543,7 +574,7 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
     // iprintln(treesAndMap.hm);
 
     if (hash == "") {
-        return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": ())), treeAndMap.hm>);
+        return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": <[],0>)), treeAndMap.hm>);
     }
     return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": treeAndMap.subtree)), treeAndMap.hm>);
 }
