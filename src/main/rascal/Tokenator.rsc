@@ -798,74 +798,53 @@ list[tuple[str, list[loc]]] visitNode(node n, list[tuple[str, list[loc]]] file, 
         }
         case \int(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__INT_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__INT_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case short(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__SHORT_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__SHORT_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case long(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__LONG_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__LONG_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case float(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__FLOAT_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__FLOAT_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case double(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__DOUBLE_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__DOUBLE_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case char(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__CHAR_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__CHAR_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case string(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__STRING_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__STRING_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case byte(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__BYTE_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__BYTE_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case \void(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__VOID_";
-                case 2: file[lastLine][0] += "__TYPE_";
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__VOID_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
         case \boolean(): {
             int lastLine = size(file) - 1;
-            switch(cloneType) {
-                case 1: file[lastLine][0] += "__BOOL_";
-                case 2: file[lastLine][0] += "__TYPE_";
-                // case 3:
-            }
+            if (cloneType == 1) { file[lastLine][0] += "__BOOLEAN_"; }
+            else { file[lastLine][0] += "__TYPE_"; }
         }
 
         // Modifiers
