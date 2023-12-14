@@ -7,10 +7,9 @@ import List;
 import Set;
 import String;
 import Node;
-import Type;
 import Map;
+import Type;
 import HashMapp;
-
 
 // Form a subtree from the parent node and all children subtrees and
 // update the hashmap with the new subtree.
@@ -18,10 +17,17 @@ import HashMapp;
 // the parent node. All children of children should be included,
 // since we do not want variable nodes missing from a statement,
 // or a missing statement from a block, for example.
-tuple[tuple[list[str] tree, int weight] subtree, map[str, map[str, int]] hm]
-    getSubtree(str parentHash, node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
-    tuple[list[str] tree, int weight] subtree = <[parentHash],1>;
+tuple[tuple[list[str] tree, str childHash, int weight] subtree, map[str hash, tuple[int weight, list[loc] locations] values] hm]
+    getSubtree(str parentHash, node n, map[str, tuple[int, list[loc]]] hm, int massThreshold) {
+    tuple[list[str] tree, str childHash, int weight] subtree = <[parentHash], "", 1>;
     list[value] children = getChildren(n);
+
+    list[loc] location = [];
+    map[str, value] nodeKeywordParameters = getKeywordParameters(n);
+    if(size(nodeKeywordParameters) > 0 && "src" in nodeKeywordParameters) {
+        location = [nodeKeywordParameters["src"]];
+    }
+
     // Keeps track of children that are nested in list parameters of a node.
     list[node] nestedChildren = [];
 
@@ -29,22 +35,27 @@ tuple[tuple[list[str] tree, int weight] subtree, map[str, map[str, int]] hm]
         switch (child) {
             // case list
             case list[value] c: nestedChildren += c;
-            case node c: subtree = getSubtreeChild(c, subtree);
+            case node c: subtree = getSubtreeChild(c, subtree, massThreshold);
         }
     }
-    for (node child <- nestedChildren) { subtree = getSubtreeChild(child, subtree); }
+    for (node child <- nestedChildren) { subtree = getSubtreeChild(child, subtree, massThreshold);}
 
-    return <subtree, updateHashMap(hm, subtree, cloneType, massThreshold)>;
+    return <subtree, updateHashMap(hm, subtree, massThreshold, location)>;
 }
 
 
 // Extract the subtree from the child and update the subtree of the parent with the child subtree.
-tuple[list[str] subtree, int weight] getSubtreeChild(node child, tuple[list[str] tree, int weight] subtree) {
+tuple[list[str] subtree, str childHash, int weight] getSubtreeChild(node child, tuple[list[str] tree, str childHash, int weight] subtree, int massThreshold) {
     childKeywords = getKeywordParameters(child);
     if (childKeywords["hash"] == "") { return subtree; }
-    tuple[list[str] subtree, int weight] subtreeChild
-        = typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]);
-    return <subtree.tree + subtreeChild.subtree, subtree.weight + subtreeChild.weight>;
+    tuple[list[str] subtree, str childHash, int weight] subtreeChild = typeCast(#tuple[list[str], str, int], getKeywordParameters(child)["subtree"]);
+    // create list of hashed children to pass to updateHashmap for possible deletion
+    str childHash = "";
+    if(subtreeChild.weight > massThreshold) {
+        childHash = md5Hash(subtreeChild.subtree);
+    }
+
+    return <subtree.tree + subtreeChild.subtree, childHash, subtree.weight + subtreeChild.weight>;
 }
 
 // Creates a subtree representation of partial code blocks with subsequent lines.
@@ -71,7 +82,7 @@ tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren]
 
 
 // Return the updated version of the node (with subtrees) and hashmap.
-tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, map[str, int]] hm, int massThreshold) {
+tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map[str, tuple[int, list[loc]]] hm, int massThreshold) {
     // println("Node:");
     // iprintln(n);
     str hashInput = "";
@@ -531,8 +542,8 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
         }
     }
 
-    tuple[tuple[list[str] subtree, int weight] subtree, map[str, map[str, int]] hm] treeAndMap
-        = getSubtree(hash, n, cloneType, hm, massThreshold);
+    tuple[tuple[list[str] subtree, str childHash, int weight] subtree, map[str hash, tuple[int weight,list[loc] locations] values] hm] treeAndMap
+        = getSubtree(hash, n, hm, massThreshold);
     // subtrees = ([hash]:1) + treesAndMap.subtrees;
 
     // println("Hash:");
