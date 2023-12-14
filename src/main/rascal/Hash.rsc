@@ -92,469 +92,498 @@ tuple[node, map[str, map[str, int]]] calcNode(node n, int cloneType, map[str, ma
     // println("Node:");
     // iprintln(n);
     str hashInput = "";
-    str hash = "";
+    // str hash = "";
     // map[list[str], int] subtrees = ();
     list[value] lines = [];
     // For children that are not in list form, need to find a way to always include those in subtree.
     switch (n) {
         // Declarations
         case \compilationUnit(list[Declaration] imports, list[Declaration] types): {
-            hash = md5Hash("compilationUnit1imports<size(imports)>types<size(types)>");
+            hashInput = "compilationUnit1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "imports<size(imports)>types<size(types)>"; }
         }
         case \compilationUnit(Declaration package, list[Declaration] imports, list[Declaration] types): {
-            hash = md5Hash("compilationUnit2imports<size(imports)>types<size(types)>");
+            hashInput = "compilationUnit2";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "imports<size(imports)>types<size(types)>"; }
         }
         case \enum(str name, list[Type] implements, list[Declaration] constants, list[Declaration] body): {
-            hashInput = "enum1implements<size(implements)>constants<size(constants)>body<size(body)>";
+            hashInput = "enum1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
-            lines = body;
+            if (cloneType == 1 || cloneType == 2) { hashInput += "constants<size(constants)>body<size(body)>"; }
+           lines = body;
         }
         case \enumConstant(str name, list[Expression] arguments, Declaration class): {
-            hashInput = "enumConstant1arguments<size(arguments)>";
+            hashInput = "enumConstant1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
         case \enumConstant(str name, list[Expression] arguments): {
-            hashInput = "enumConstant2arguments<size(arguments)>";
+            hashInput = "enumConstant2";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
         case \class(str name, list[Type] extends, list[Type] implements, list[Declaration] body): {
-            hashInput = "class1extends<size(extends)>implements<size(implements)>body<size(body)>";
+            hashInput = "class1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "implements<size(implements)>body<size(body)>"; }
             lines = body;
         }
         case \class(list[Declaration] body): {
-            hash = md5Hash("class2body<size(body)>");
+            hashInput ="class2";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "body<size(body)>"; }
             lines = body;
         }
         case \interface(str name, list[Type] extends, list[Type] implements, list[Declaration] body): {
-            hashInput = "interface1extends<size(extends)>implements<size(implements)>body<size(body)>";
+            hashInput = "interface1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "extends<size(extends)>implements<size(implements)>body<size(body)>"; }
             lines = body;
         }
         case \field(Type \type, list[Expression] fragments): {
-            hash = md5Hash("field1fragments<size(fragments)>");
+            hashInput = "field1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "fragments<size(fragments)>"; }
         }
         case \initializer(Statement initializerBody): {
-            hash = md5Hash("initializer1");
+            hashInput = "initializer1";
         }
         case \method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
-            hashInput = "method1parameters<size(parameters)>exceptions<size(exceptions)>";
+            hashInput = "method1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "parameters<size(parameters)>exceptions<size(exceptions)>"; }
         }
         case \method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions): {
-            hashInput = "method2parameters<size(parameters)>exceptions<size(exceptions)>";
+            hashInput = "method2";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "parameters<size(parameters)>exceptions<size(exceptions)>"; }
         }
         case \constructor(str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
-            hashInput = "constructor1parameters<size(parameters)>exceptions<size(exceptions)>";
+            hashInput = "constructor1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "parameters<size(parameters)>exceptions<size(exceptions)>"; }
         }
-        case \import(str name): { // Not sure if imports and package names may differ in T2
-            hashInput = "import1";
-            if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+        case \import(str name): {
+            hashInput = "import1<name>";
         }
-        case \package(str name): { // Not sure if imports and package names may differ in T2
-            hashInput = "package1";
-            if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+        case \package(str name): {
+            hashInput = "package1<name>";
         }
-        case \package(Declaration parentPackage, str name): { // Not sure if imports and package names may differ in T2
-            hashInput = "package1";
-            if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+        case \package(Declaration parentPackage, str name): {
+            hashInput = "package2<name>";
         }
         case \variables(Type \type, list[Expression] \fragments): {
-            hash = md5Hash("variables1fragments<size(fragments)>");
+            hashInput = "variables1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "fragments<size(\fragments)>"; }
         }
         case \typeParameter(str name, list[Type] extendsList): {
-            hashInput = "typeParameter1extendsList<size(extendsList)>";
+            hashInput = "typeParameter1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "extendsList<size(extendsList)>"; }
         }
         case \annotationType(str name, list[Declaration] body): {
-            hashInput = "annotationType1body<size(body)>";
+            hashInput = "annotationType1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "body<size(body)>"; }
             lines = body;
         }
         case \annotationTypeMember(Type \type, str name): {
             hashInput = "annotationTypeMember1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \annotationTypeMember(Type \type, str name, Expression defaultBlock): {
             hashInput = "annotationTypeMember2";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \parameter(Type \type, str name, int extraDimensions): {
             hashInput = "parameter1";
             if (cloneType == 1) { hashInput = hashInput + name + "<extraDimensions>"; }
-            hash = md5Hash(hashInput);
         }
         case \vararg(Type \type, str name): {
             hashInput = "vararg1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
 
         // Expressions
         case \arrayAccess(Expression array, Expression index): {
-            hash = md5Hash("arrayAccess1");
+            hashInput = "arrayAccess1";
         }
         case \newArray(Type \type, list[Expression] dimensions, Expression init): {
-            hash = md5Hash("newArray1dimensions<size(dimensions)>");
+            hashInput = "newArray1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "dimensions<size(dimensions)>"; }
         }
         case \newArray(Type \type, list[Expression] dimensions): {
-            hash = md5Hash("newArray1dimensions<size(dimensions)>");
+            hashInput = "newArray1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "dimensions<size(dimensions)>"; }
         }
         case \arrayInitializer(list[Expression] elements): {
-            hash = md5Hash("arrayInitializer1elements<size(elements)>");
+            hashInput = "arrayInitializer1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "elements<size(elements)>"; }
         }
         case \assignment(Expression lhs, str operator, Expression rhs): {
-            hash = md5Hash("assignment1" + operator); // Operators cannot differ in T2, so are always included.
+            hashInput = "assignment1" + operator; // Operators cannot differ in T2, so are always included.
         }
         case \cast(Type \type, Expression expression): {
-            hash = md5Hash("cast1");
+            hashInput = "cast1";
         }
         case \characterLiteral(str charValue): {
             hashInput = "characterLiteral1";
             if (cloneType == 1) { hashInput = hashInput + charValue; }
-            hash = md5Hash(hashInput);
         }
         case \newObject(Expression expr, Type \type, list[Expression] args, Declaration class): {
-            hash = md5Hash("newObject1args<size(args)>");
+            hashInput = "newObject1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "args<size(args)>"; }
         }
         case \newObject(Expression expr, Type \type, list[Expression] args): {
-            hash = md5Hash("newObject2args<size(args)>");
+            hashInput = "newObject2";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "args<size(args)>"; }
         }
         case \newObject(Type \type, list[Expression] args, Declaration class): {
-            hash = md5Hash("newObject3args<size(args)>");
+            hashInput = "newObject3";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "args<size(args)>"; }
         }
         case \newObject(Type \type, list[Expression] args): {
-            hash = md5Hash("newObject4args<size(args)>");
+            hashInput = "newObject4";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "args<size(args)>"; }
         }
         case \qualifiedName(Expression qualifier, Expression expression): {
-            hash = md5Hash("qualifiedName1");
+            hashInput = "qualifiedName1";
         }
         case \conditional(Expression expression, Expression thenBranch, Expression elseBranch): {
-            hash = md5Hash("conditional1");
+            hashInput = "conditional1";
         }
         case \fieldAccess(bool isSuper, Expression expression, str name): {
             hashInput = "fieldAccess1<isSuper>";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \fieldAccess(bool isSuper, str name): {
             hashInput = "fieldAccess2<isSuper>";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \instanceof(Expression leftSide, Type rightSide): {
-            hash = md5Hash("instanceof1");
+            hashInput = "instanceof1";
         }
         case \methodCall(bool isSuper, str name, list[Expression] arguments): {
-            hashInput = "methodCall1arguments<size(arguments)><isSuper>";
+            hashInput = "methodCall1<isSuper>";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
         case \methodCall(bool isSuper, Expression receiver, str name, list[Expression] arguments): {
-            hashInput = "methodCall2arguments<size(arguments)><isSuper>";
+            hashInput = "methodCall2<isSuper>";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
         case \null(): {
-            hash = md5Hash("null1");
+            hashInput = "null1";
         }
         case \number(str numberValue): {
             hashInput = "number1";
             if (cloneType == 1) { hashInput = hashInput + numberValue; }
-            hash = md5Hash(hashInput);
         }
         case \booleanLiteral(bool boolValue): {
-            hash = md5Hash("booleanLiteral1");
+            hashInput = "booleanLiteral1";
             if (cloneType == 1) { hashInput = hashInput + "<boolValue>"; }
         }
         case \stringLiteral(str stringValue): {
             hashInput = "stringLiteral1";
             if (cloneType == 1) { hashInput = hashInput + stringValue; }
-            hash = md5Hash(hashInput);
         }
         case \type(Type \type): {
-            hash = md5Hash("type1");
+            hashInput = "type1";
         }
         case \variable(str name, int extraDimensions): {
             hashInput = "variable1";
             if (cloneType == 1) { hashInput = hashInput + name + "<extraDimensions>"; }
-            hash = md5Hash(hashInput);
         }
         case \variable(str name, int extraDimensions, Expression \initializer): {
             hashInput = "variable2";
             if (cloneType == 1) { hashInput = hashInput + name + "<extraDimensions>"; }
-            hash = md5Hash(hashInput);
         }
         case \bracket(Expression expression): {
-            hash = md5Hash("bracket1");
+            hashInput = "bracket1";
         }
         case \this(): {
-            hash = md5Hash("this1");
+            hashInput = "this1";
         }
         case \this(Expression thisExpression): {
-            hash = md5Hash("this2");
+            hashInput = "this2";
         }
         case \super(): {
-            hash = md5Hash("super1");
+            hashInput = "super1";
         }
         case \declarationExpression(Declaration declaration): {
-            hash = md5Hash("declarationExpression1");
+            hashInput = "declarationExpression1";
         }
         case \infix(Expression lhs, str operator, Expression rhs): {
-            hash = md5Hash("infix1" + operator);
+            hashInput = "infix1" + operator;
         }
         case \postfix(Expression operand, str operator): {
-            hash = md5Hash("postfix1" + operator);
+            hashInput = "postfix1" + operator;
         }
         case \prefix(str operator, Expression operand): {
-            hash = md5Hash("prefix1" + operator);
+            hashInput = "prefix1" + operator;
         }
         case \simpleName(str name): {
             hashInput = "simpleName1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \markerAnnotation(str typeName): {
             hashInput = "markerAnnotation1";
             if (cloneType == 1) { hashInput = hashInput + typeName; }
-            hash = md5Hash(hashInput);
         }
         case \normalAnnotation(str typeName, list[Expression] memberValuePairs): {
-            hashInput = "normalAnnotation1memberValuePairs<size(memberValuePairs)>";
+            hashInput = "normalAnnotation1";
             if (cloneType == 1) { hashInput = hashInput + typeName; }
-            hash = md5Hash(hashInput);
+            if (cloneType == 1 || cloneType == 2) { hashInput += "memberValuePairs<size(memberValuePairs)>"; }
         }
         case \memberValuePair(str name, Expression \value): {
             hashInput = "memberValuePair1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \singleMemberAnnotation(str typeName, Expression \value): {
             hashInput = "singleMemberAnnotation1";
             if (cloneType == 1) { hashInput = hashInput + typeName; }
-            hash = md5Hash(hashInput);
         }
 
         // Statements
         case \assert(Expression expression): {
-            hash = md5Hash("assert1");
+            hashInput = "assert1";
         }
         case \assert(Expression expression, Expression message): {
-            hash = md5Hash("assert2");
+            hashInput = "assert2";
         }
         case \block(list[Statement] statements): {
-            hash = md5Hash("block1statements<size(statements)>");
+            hashInput = "block1";
             lines = statements;
+            if (cloneType == 1 || cloneType == 2) { hashInput += "statements<size(statements)>"; }
         }
         case \break(): {
-            hash = md5Hash("break1");
+            hashInput = "break1";
         }
-        case \break(str label): { // Not sure if label should also be included in t2
+        case \break(str label): {
             hashInput = "break2";
             if (cloneType == 1) { hashInput = hashInput + label; }
-            hash = md5Hash(hashInput);
         }
         case \continue(): {
-            hash = md5Hash("continue1");
+            hashInput = "continue1";
         }
-        case \continue(str label): { // Not sure if label should also be included in t2
+        case \continue(str label): {
             hashInput = "continue2";
             if (cloneType == 1) { hashInput = hashInput + label; }
-            hash = md5Hash(hashInput);
         }
         case \do(Statement body, Expression condition): {
-            hash = md5Hash("do1");
+            hashInput = "do1";
         }
         case \empty(): {
-            hash = md5Hash("empty1");
+            hashInput = "empty1";
         }
         case \foreach(Declaration parameter, Expression collection, Statement body): {
-            hash = md5Hash("foreach1");
+            hashInput = "foreach1";
         }
         case \for(list[Expression] initializers, Expression condition, list[Expression] updaters, Statement body): {
-            hash = md5Hash("for1initializers<size(initializers)>updaters<size(updaters)>");
+            hashInput = "for1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "initializers<size(initializers)>updaters<size(updaters)>"; }
         }
         case \for(list[Expression] initializers, list[Expression] updaters, Statement body): {
-            hash = md5Hash("for2initializers<size(initializers)>updaters<size(updaters)>");
+            hashInput = "for2";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "initializers<size(initializers)>updaters<size(updaters)>"; }
         }
         case \if(Expression condition, Statement thenBranch): {
-            hash = md5Hash("if1");
+            hashInput = "if1";
         }
         case \if(Expression condition, Statement thenBranch, Statement elseBranch): {
-            hash = md5Hash("if2");
+            hashInput = "if2";
         }
         case \label(str name, Statement body): {
             hashInput = "label1";
             if (cloneType == 1) { hashInput = hashInput + name; }
-            hash = md5Hash(hashInput);
         }
         case \return(Expression expression): {
-            hash = md5Hash("return1");
+            hashInput = "return1";
         }
         case \return(): {
-            hash = md5Hash("return2");
+            hashInput = "return2";
         }
         case \switch(Expression expression, list[Statement] statements): {
-            hash = md5Hash("switch1statements<size(statements)>");
+            hashInput = "switch1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "statements<size(statements)>"; }
             lines = statements;
         }
         case \case(Expression expression): {
-            hash = md5Hash("case1");
+            hashInput = "case1";
         }
         case \defaultCase(): {
-            hash = md5Hash("defaultCase1");
+            hashInput = "defaultCase1";
         }
         case \synchronizedStatement(Expression lock, Statement body): {
-            hash = md5Hash("synchronizedStatement1");
+            hashInput = "synchronizedStatement1";
         }
         case \throw(Expression expression): {
-            hash = md5Hash("throw1");
+            hashInput = "throw1";
         }
         case \try(Statement body, list[Statement] catchClauses): {
-            hash = md5Hash("try1catchClauses<size(catchClauses)>");
+            hashInput = "try1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "catchClauses<size(catchClauses)>"; }
         }
         case \try(Statement body, list[Statement] catchClauses, Statement \finally): {
-            hash = md5Hash("try2catchClauses<size(catchClauses)>");
+            hashInput = "try2";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "catchClauses<size(catchClauses)>"; }
         }
         case \catch(Declaration exception, Statement body): {
-            hash = md5Hash("catch1");
+            hashInput = "catch1";
         }
         case \declarationStatement(Declaration declaration): {
-            hash = md5Hash("declarationStatement1");
+            hashInput = "declarationStatement1";
         }
         case \while(Expression condition, Statement body): {
-            hash = md5Hash("while1");
+            hashInput = "while1";
         }
         case \expressionStatement(Expression stmt): {
-            hash = md5Hash("expressionStatement1");
+            hashInput = "expressionStatement1";
         }
         case \constructorCall(bool isSuper, Expression expr, list[Expression] arguments): {
-            hash = md5Hash("constructorCall1arguments<size(arguments)><isSuper>");
+            hashInput = "constructorCall1<isSuper>";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
         case \constructorCall(bool isSuper, list[Expression] arguments): {
-            hash = md5Hash("constructorCall2arguments<size(arguments)><isSuper>");
+            hashInput = "constructorCall2<isSuper>";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "arguments<size(arguments)>"; }
         }
 
         // Types
         case arrayType(Type \type): {
-            hash = md5Hash("arrayType1");
+            hashInput = "arrayType1";
         }
         case parameterizedType(Type \type): {
-            hash = md5Hash("parameterizedType1");
+            hashInput = "parameterizedType1";
         }
         case qualifiedType(Type qualifier, Expression simpleName): {
-            hash = md5Hash("qualifiedType1");
+            hashInput = "qualifiedType1";
         }
         case simpleType(Expression typeName): {
-            hash = md5Hash("simpleType1");
+            hashInput = "simpleType1";
         }
         case unionType(list[Type] types): {
-            hash = md5Hash("unionType1types<size(types)>");
+            hashInput = "unionType1";
+            if (cloneType == 1 || cloneType == 2) { hashInput += "types<size(types)>"; }
         }
         case wildcard(): {
-            hash = md5Hash("wildcard1");
+            hashInput = "wildcard1";
         }
         case upperbound(Type \type): {
-            hash = md5Hash("upperbound1");
+            hashInput = "upperbound1";
         }
         case lowerbound(Type \type): {
-            hash = md5Hash("lowerbound1");
+            hashInput = "lowerbound1";
         }
         case \int(): {
-            hash = md5Hash("int1");
+            switch(cloneType) {
+                case 1: hashInput = "int1";
+                case 2: hashInput = "type";
+            }
         }
         case short(): {
-            hash = md5Hash("short1");
+            switch(cloneType) {
+                case 1: hashInput = "short1";
+                case 2: hashInput = "type";
+            }
         }
         case long(): {
-            hash = md5Hash("long1");
+            switch(cloneType) {
+                case 1: hashInput = "long1";
+                case 2: hashInput = "type";
+            }
         }
         case float(): {
-            hash = md5Hash("float1");
+            switch(cloneType) {
+                case 1: hashInput = "float1";
+                case 2: hashInput = "type";
+            }
         }
         case double(): {
-            hash = md5Hash("double1");
+            switch(cloneType) {
+                case 1: hashInput = "double1";
+                case 2: hashInput = "type";
+            }
         }
         case char(): {
-            hash = md5Hash("char1");
+            switch(cloneType) {
+                case 1: hashInput = "char1";
+                case 2: hashInput = "type";
+            }
         }
         case string(): {
-            hash = md5Hash("string1");
+            switch(cloneType) {
+                case 1: hashInput = "string1";
+                case 2: hashInput = "type";
+            }
         }
         case byte(): {
-            hash = md5Hash("byte1");
+            switch(cloneType) {
+                case 1: hashInput = "byte1";
+                case 2: hashInput = "type";
+            }
         }
         case \void(): {
-            hash = md5Hash("void1");
+            switch(cloneType) {
+                case 1: hashInput = "void1";
+                case 2: hashInput = "type";
+            }
         }
         case \boolean(): {
-            hash = md5Hash("boolean1");
+            switch(cloneType) {
+                case 1: hashInput = "boolean1";
+                case 2: hashInput = "type";
+            }
         }
 
         // Modifiers
         case \private(): {
-            hash = md5Hash("private1");
+            hashInput = "private1";
         }
         case \public(): {
-            hash = md5Hash("public1");
+            hashInput = "public1";
         }
         case \protected(): {
-            hash = md5Hash("protected1");
+            hashInput = "protected1";
         }
         case \friendly(): {
-            hash = md5Hash("friendly1");
+            hashInput = "friendly1";
         }
         case \static(): {
-            hash = md5Hash("static1");
+            hashInput = "static1";
         }
         case \final(): {
-            hash = md5Hash("final1");
+            hashInput = "final1";
         }
         case \synchronized(): {
-            hash = md5Hash("synchronized1");
+            hashInput = "synchronized1";
         }
         case \transient(): {
-            hash = md5Hash("transient1");
+            hashInput = "transient1";
         }
         case \abstract(): {
-            hash = md5Hash("abstract1");
+            hashInput = "abstract1";
         }
         case \native(): {
-            hash = md5Hash("native1");
+            hashInput = "native1";
         }
         case \volatile(): {
-            hash = md5Hash("volatile1");
+            hashInput = "volatile1";
         }
         case \strictfp(): {
-            hash = md5Hash("strictfp1");
+            hashInput = "strictfp1";
         }
         case \annotation(Expression \anno): {
-            hash = md5Hash("annotation1");
+            hashInput = "annotation1";
         }
         case \onDemand(): {
-            hash = md5Hash("onDemand1");
+            hashInput = "onDemand1";
         }
         case \default(): {
-            hash = md5Hash("default1");
+            hashInput = "default1";
         }
     }
+
+    hash = md5Hash(hashInput);
 
     // Also add subsequences within code blocks to the hash map.
     if (!isEmpty(lines)) {
