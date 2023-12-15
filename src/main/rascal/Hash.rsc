@@ -58,21 +58,6 @@ tuple[tuple[list[str] subtree, int weight] subtree, list[str] childHashes] getSu
     return <<parentTree.subtree.tree + subtreeChild.subtree, parentTree.subtree.weight + subtreeChild.weight>, parentTree.childHashes + childHash>;
 }
 
-
-// Extract the subtree from a child node's keyword paramaters.
-tuple[list[str] subtree, int weight] getChildTree(node child) {
-    return(typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]));
-}
-
-
-// Extract the subtrees from a block of code.
-list[tuple[list[str] tree, int weight]] getLines(list[value] lines) {
-    list[tuple[list[str], int]] subtrees = [];
-    for (node line <- lines) { subtrees += [getChildTree(line)]; }
-    return subtrees;
-}
-
-
 // Creates a subtree representation of partial code blocks with subsequent lines.
 // E.g. a block of 3 lines will be transformed into a list of blocks:
 // [[0],[0,1],[0,1,2],[1],[1,2],[2]]
@@ -82,8 +67,10 @@ tuple[map[str hash, tuple[int weight,list[loc] locations] values] hm, list[str] 
                         int cloneType,
                         map[str hash, tuple[int weight,list[loc] locations] values] hm,
                         int massThreshold) {
-    list[tuple[list[str], int]] subtrees = [];
-    for (node line <- lines) { subtrees += [getChildTree(line)]; }
+    list[tuple[tuple[list[str], int], loc]] subtrees = [];
+    for (node line <- lines) {
+        subtrees += [<typeCast(#tuple[list[str], int], getKeywordParameters(line)["subtree"]), getKeywordParameters(line)["src"]>];
+    }
 
     // Map of start and end subtree index of found clones of the highest level.
     map[tuple[int, int], str] clones = ();
@@ -91,17 +78,20 @@ tuple[map[str hash, tuple[int weight,list[loc] locations] values] hm, list[str] 
     map[tuple[int, int], str] cloneChildren = ();
     tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound] hmUpdate = <hm, false>;
     int len = size(subtrees);
-    list[loc] location = [];
 
     // TODO: pass correct locations by taking begin from line[i] and end from line[j];
     for (int i <- [0..len]) {
+        loc location = subtrees[i][1];
         for (int j <- [i..len]) {
+            if(j != i) {
+                location.end.line = subtrees[j][1].end.line;
+            }
             tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] nextSubtree = <<[],0>, []>;
-            for (tuple[list[str] tree, int weight] subtree <- subtrees[i..j+1]) {
-                nextSubtree = <<nextSubtree.subtree.tree + subtree.tree, nextSubtree.subtree.weight + subtree.weight>, nextSubtree.childHashes>;
+            for (tuple[tuple[list[str] tree, int weight] subtree, loc location] subtreeInfo <- subtrees[i..j+1]) {
+                nextSubtree = <<nextSubtree.subtree.tree + subtreeInfo.subtree.tree, nextSubtree.subtree.weight + subtreeInfo.subtree.weight>, nextSubtree.childHashes>;
                 // iprintln(nextSubtree);
             }
-            hmUpdate = updateHashMap(hmUpdate.hm, nextSubtree, massThreshold, location);
+            hmUpdate = updateHashMap(hmUpdate.hm, nextSubtree, massThreshold, [location]);
             if (hmUpdate.cloneFound && nextSubtree.subtree.weight >= massThreshold) {
                 for (cloneIndex <- domain(clones)) {
                     // Move subset of current set to cloneChildren.
