@@ -14,38 +14,48 @@ import String;
 // hashed root node:
 //     hashed subtree: #duplicate occurences subtree
 // map[str, int]hm = updateHashMap(("nodea", 1), <["nodea"], 1>, 1, 3)
-map[str, tuple[int, list[loc]]] updateHashMap(map[str hash, tuple[int weight, list[loc] locations] values] hm,
-                                                tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] subtreeInfo, int massThreshold, list[loc] location) {
+tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound]
+    updateHashMap(map[str hash, tuple[int weight, list[loc] locations] values] hm,
+                    tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] subtreeInfo,
+                    int massThreshold,
+                    list[loc] location) {
     if (subtreeInfo.subtree.weight < massThreshold) {
-        return hm;
+        return <hm, false>;
     }
 
+    bool cloneFound = false;
     str hashedSubtree = md5Hash(subtreeInfo.subtree.tree);
     // TODO: remove subtrees of current tree from counter.
     if (hashedSubtree in hm) {
+        cloneFound = true;
         tuple[int weight, list[loc] locations] values = hm[hashedSubtree];
         if (values.weight == 0) {
             hm[hashedSubtree] =  <2, values.locations + location>;
-            if(size(subtreeInfo.childHashes) > 0 ) {
-                for(ch <- subtreeInfo.childHashes) {
-                    if(ch in hm) {
-                        hm[ch].weight -= 2;
-                    }
-                }
-            }
         } else {
             hm[hashedSubtree] = <values.weight + 1, values.locations + location>;
-            if(size(subtreeInfo.childHashes) > 0 ) {
-                for(ch <- subtreeInfo.childHashes) {
-                    if(ch in hm) {
-                        hm[ch].weight -=1;
-                    }
-                }
-            }
         }
+        hm = subtractSubclones(hm, subtreeInfo.childHashes);
     } else {
         hm[hashedSubtree] =  <0, location>;
     }
+    return <hm, cloneFound>;
+}
+
+
+// Remove previously counted children of clones from the hashmap.
+map[str, tuple[int, list[loc]]] subtractSubclones(map[str hash, tuple[int weight, list[loc] locations] values] hm,
+                                                    list[str] childHashes) {
+    for (child <- childHashes) {
+        if (child notin hm) { continue; }
+        if (hm[child].weight == 2) {
+            hm[child].weight = 0;
+            continue;
+        }
+        if (hm[child].weight > 2) {
+            hm[child].weight -= 1;
+        }
+    }
+
     return hm;
 }
 

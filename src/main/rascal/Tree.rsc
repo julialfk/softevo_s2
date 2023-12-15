@@ -6,7 +6,7 @@ import Node;
 import Hash;
 import List;
 import Type;
-import Lexer;
+// import Lexer;
 
 // AST //
 public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonetype) {
@@ -32,13 +32,13 @@ private real getASTtypeI(list[Declaration] ASTs, int totalLines) {
     map[str hash, tuple[int clones, list[loc] locations] values] hm = ("": <0, []>);
     list[list[tuple[str, list[loc]]]] files = [];
     for (ast <- ASTs) {
-        files += [visitNode(ast, [], 1)];
-        // bottom-up visit(ast) {
-        //     case node n => {
-        //         tuple[node nNew, map[str hash, tuple[int clones, list[loc] locations] values] hmNew] result = calcNode(n, 1, hm, massThreshold);
-        //         hm = result.hmNew;
-        //         result.nNew;
-        //     }
+        // files += [visitNode(ast, [], 1)];
+        bottom-up visit(ast) {
+            case node n => {
+                tuple[node nNew, map[str hash, tuple[int clones, list[loc] locations] values] hmNew] result = calcNode(n, 1, hm, massThreshold);
+                hm = result.hmNew;
+                result.nNew;
+            }
         //         // println(n);
         //         // println(getChildren(n));
         //         // println(size(getChildren(n)));
@@ -61,7 +61,7 @@ private real getASTtypeI(list[Declaration] ASTs, int totalLines) {
         //         //     println("arity = <arity(n)>\n");
         //         //     println(getKeywordParameters(n));
         //         // }
-        // }
+        }
         unsetRec(ast);
     }
 
@@ -75,10 +75,13 @@ private real getASTtypeI(list[Declaration] ASTs, int totalLines) {
             }
         }
     }
-    // iprintln(filt);
+    // iprintToFile(|project://lab2/output/output.txt|,files);
+
+    iprintln(filt);
     println("Total node clones: <size(filt)>");
     println("Total cloneLines: <totalCloneLines>");
     return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
+    // return 0.0;
 }
 
 // Debug Scratch pad:

@@ -83,6 +83,7 @@ list[list[int]] partialSubsequences(list[int] lst) {
     for (int i <- [0..len]) {
         for (int j <- [i..len]) {
             result += [lst[i..j+1]];
+            iprintln([lst[i..j+1]]);
         }
     }
 
