@@ -120,7 +120,6 @@ tuple[map[str hash, tuple[int weight,list[loc] locations] values] hm, list[str] 
     }
 
     hm = subtractSubclones(hmUpdate.hm, toList(range(cloneChildren)));
-
     return <hm, toList(range(clones))>;
 }
 
@@ -139,16 +138,18 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         case \compilationUnit(list[Declaration] imports, list[Declaration] types): {
             hashInput = "compilationUnit1";
             if (cloneType == 1 || cloneType == 2) { hashInput += "imports<size(imports)>types<size(types)>"; }
+            lines = imports + types;
         }
         case \compilationUnit(Declaration package, list[Declaration] imports, list[Declaration] types): {
             hashInput = "compilationUnit2";
             if (cloneType == 1 || cloneType == 2) { hashInput += "imports<size(imports)>types<size(types)>"; }
+            lines = [package] + imports + types;
         }
         case \enum(str name, list[Type] implements, list[Declaration] constants, list[Declaration] body): {
             hashInput = "enum1";
             if (cloneType == 1) { hashInput = hashInput + name; }
             if (cloneType == 1 || cloneType == 2) { hashInput += "constants<size(constants)>body<size(body)>"; }
-           lines = body;
+            lines = constants + body;
         }
         case \enumConstant(str name, list[Expression] arguments, Declaration class): {
             hashInput = "enumConstant1";
@@ -460,10 +461,12 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         case \try(Statement body, list[Statement] catchClauses): {
             hashInput = "try1";
             if (cloneType == 1 || cloneType == 2) { hashInput += "catchClauses<size(catchClauses)>"; }
+            lines = catchClauses;
         }
         case \try(Statement body, list[Statement] catchClauses, Statement \finally): {
             hashInput = "try2";
             if (cloneType == 1 || cloneType == 2) { hashInput += "catchClauses<size(catchClauses)>"; }
+            lines = catchClauses;
         }
         case \catch(Declaration exception, Statement body): {
             hashInput = "catch1";
