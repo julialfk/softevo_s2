@@ -491,64 +491,44 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
             hashInput = "lowerbound1";
         }
         case \int(): {
-            switch(cloneType) {
-                case 1: hashInput = "int1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "int1"; }
+            else { hashInput = "type"; }
         }
         case short(): {
-            switch(cloneType) {
-                case 1: hashInput = "short1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "short1"; }
+            else { hashInput = "type"; }
         }
         case long(): {
-            switch(cloneType) {
-                case 1: hashInput = "long1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "long1"; }
+            else { hashInput = "type"; }
         }
         case float(): {
-            switch(cloneType) {
-                case 1: hashInput = "float1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "float1"; }
+            else { hashInput = "type"; }
         }
         case double(): {
-            switch(cloneType) {
-                case 1: hashInput = "double1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "double1"; }
+            else { hashInput = "type"; }
         }
         case char(): {
-            switch(cloneType) {
-                case 1: hashInput = "char1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "char1"; }
+            else { hashInput = "type"; }
         }
         case string(): {
-            switch(cloneType) {
-                case 1: hashInput = "string1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "string1"; }
+            else { hashInput = "type"; }
         }
         case byte(): {
-            switch(cloneType) {
-                case 1: hashInput = "byte1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "byte1"; }
+            else { hashInput = "type"; }
         }
         case \void(): {
-            switch(cloneType) {
-                case 1: hashInput = "void1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "void1"; }
+            else { hashInput = "type"; }
         }
         case \boolean(): {
-            switch(cloneType) {
-                case 1: hashInput = "boolean1";
-                case 2: hashInput = "type";
-            }
+            if (cloneType == 1) { hashInput = "boolean1"; }
+            else { hashInput = "type"; }
         }
 
         // Modifiers
