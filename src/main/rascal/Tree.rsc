@@ -3,17 +3,16 @@ module Tree
 import IO;
 import lang::java::m3::AST;
 import Node;
-import Map;
 import Hash;
 import List;
 import Type;
 import Lexer;
 
 // AST //
-public real getASTduplication(list[Declaration] ASTs, int clonetype) {
+public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonetype) {
     real result = 0.0;
     switch (clonetype) {
-        case 1: result = getASTtypeI(ASTs);
+        case 1: result = getASTtypeI(ASTs, totalLines);
     }
     return result;
 }
@@ -27,16 +26,16 @@ public real getASTduplication(list[Declaration] ASTs, int clonetype) {
 // it returns these subtrees as a hashed value in a list, which is then
 // added to the map of all hashed subtrees, if it's already in the list
 // the value of the hashkey is then incremented(?)
-private real getASTtypeI(list[Declaration] ASTs) {
-    int massThreshold = 5;
+private real getASTtypeI(list[Declaration] ASTs, int totalLines) {
+    int massThreshold = 15;
     // list[str] hashedsubtrees = [];
-    map[str, map[str, int]] hm = ();
+    map[str hash, tuple[int clones, list[loc] locations] values] hm = ("": <0, []>);
     list[list[tuple[str, list[loc]]]] files = [];
     for (ast <- ASTs) {
         files += [visitNode(ast, [], 1)];
         // bottom-up visit(ast) {
         //     case node n => {
-        //         tuple[node nNew, map[str, map[str, int]] hmNew] result = calcNode(n, 1, hm, massThreshold);
+        //         tuple[node nNew, map[str hash, tuple[int clones, list[loc] locations] values] hmNew] result = calcNode(n, 1, hm, massThreshold);
         //         hm = result.hmNew;
         //         result.nNew;
         //     }
@@ -65,8 +64,21 @@ private real getASTtypeI(list[Declaration] ASTs) {
         // }
         unsetRec(ast);
     }
-    iprintToFile(|project://lab2/output/output.txt|,files);
-    return 0.0;
+
+    int totalCloneLines = 0;
+    list[tuple[int clones, list[loc] locations] values] filt = [];
+    for(tuple[int clones, list[loc] locations] values <- hm.values) {
+        if(values.clones > 0) {
+            filt += [values];
+            for(loc l <- values.locations) {
+                totalCloneLines += (l.end.line - l.begin.line) + 1;
+            }
+        }
+    }
+    // iprintln(filt);
+    println("Total node clones: <size(filt)>");
+    println("Total cloneLines: <totalCloneLines>");
+    return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
 }
 
 // Debug Scratch pad:
@@ -79,10 +91,10 @@ private real getASTtypeI(list[Declaration] ASTs) {
             // }
 
 // this function does the subtree magick
-private tuple[int weight, list[str] subtrees] mapAllPossibilities(node parent, int massThreshold) {
+// private tuple[int weight, list[str] subtrees] mapAllPossibilities(node parent, int massThreshold) {
 
-    return <3,["blob", "wlop"]>;
-}
+//     return <3,["blob", "wlop"]>;
+// }
 
 // Type II Pattern Recognition implementation //
 
