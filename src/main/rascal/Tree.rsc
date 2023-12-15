@@ -7,6 +7,7 @@ import Map;
 import Hash;
 import List;
 import Type;
+import Lexer;
 
 // AST //
 public real getASTduplication(list[Declaration] ASTs, int clonetype) {
@@ -30,39 +31,41 @@ private real getASTtypeI(list[Declaration] ASTs) {
     int massThreshold = 5;
     // list[str] hashedsubtrees = [];
     map[str, map[str, int]] hm = ();
+    list[list[tuple[str, list[loc]]]] files = [];
     for (ast <- ASTs) {
-        bottom-up visit(ast) {
-            case node n => {
-                tuple[node nNew, map[str, map[str, int]] hmNew] result = calcNode(n, 1, hm, massThreshold);
-                hm = result.hmNew;
-                result.nNew;
-            }
-                // println(n);
-                // println(getChildren(n));
-                // println(size(getChildren(n)));
-                // tuple[str hash, map[list[str], int] subtrees] newParameters = calcNode(n, 1);
-                // n = setKeywordParameters(n, getKeywordParameters(n) + ("hash": newParameters.hash) + ("subtrees": newParameters.subtrees));
-                // println(getKeywordParameters(n));
-                // println(getKeywordParameters(n));
-                // if (arity(n) == 0) {
-                    // leaves don't have subtrees, skip asap
-                    // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
-                // }
-                // else {
-                    // tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
-                    // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
-                    // hashedsubtrees += subtree.subtrees;
-                // }
-                // list[value] children = getChildren(n);
-                // if (size(children) != arity(n)) {
-                //     println("children = <size(children)>\n");
-                //     println("arity = <arity(n)>\n");
-                //     println(getKeywordParameters(n));
-                // }
-        }
+        files += [visitNode(ast, [], 1)];
+        // bottom-up visit(ast) {
+        //     case node n => {
+        //         tuple[node nNew, map[str, map[str, int]] hmNew] result = calcNode(n, 1, hm, massThreshold);
+        //         hm = result.hmNew;
+        //         result.nNew;
+        //     }
+        //         // println(n);
+        //         // println(getChildren(n));
+        //         // println(size(getChildren(n)));
+        //         // tuple[str hash, map[list[str], int] subtrees] newParameters = calcNode(n, 1);
+        //         // n = setKeywordParameters(n, getKeywordParameters(n) + ("hash": newParameters.hash) + ("subtrees": newParameters.subtrees));
+        //         // println(getKeywordParameters(n));
+        //         // println(getKeywordParameters(n));
+        //         // if (arity(n) == 0) {
+        //             // leaves don't have subtrees, skip asap
+        //             // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
+        //         // }
+        //         // else {
+        //             // tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
+        //             // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
+        //             // hashedsubtrees += subtree.subtrees;
+        //         // }
+        //         // list[value] children = getChildren(n);
+        //         // if (size(children) != arity(n)) {
+        //         //     println("children = <size(children)>\n");
+        //         //     println("arity = <arity(n)>\n");
+        //         //     println(getKeywordParameters(n));
+        //         // }
+        // }
         unsetRec(ast);
     }
-    iprintln(hm);
+    iprintToFile(|project://lab2/output/output.txt|,files);
     return 0.0;
 }
 

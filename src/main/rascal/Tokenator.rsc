@@ -9,7 +9,7 @@ import List;
 
 
 list[tuple[str, list[loc]]] visitNode(node n, list[tuple[str, list[loc]]] file, int cloneType) {
-    iprintln(n);
+    // iprintln(n);
     list[loc] nodeSrc = [];
     switch (n) {
         // Declarations

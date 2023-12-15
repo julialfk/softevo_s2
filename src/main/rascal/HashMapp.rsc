@@ -17,9 +17,7 @@ import Type;
 // hashed root node:
 //     hashed subtree: #duplicate occurences subtree
 map[str, map[str, int]] updateHashMap(map[str, map[str, int]] hm, tuple[list[str] tree, int weight] subtree, int cloneType, int massThreshold) {
-    if (subtree.weight < massThreshold) {
-        return hm;
-    }
+    if (subtree.weight < massThreshold) { return hm; }
     str rootNode = subtree.tree[0];
     // Type 1 and 2 clones have to be of the same weight.
     if (cloneType == 1 || cloneType == 2) { rootNode += toString(subtree.weight); }
@@ -38,9 +36,7 @@ map[str, map[str, int]] updateHashMap(map[str, map[str, int]] hm, tuple[list[str
 // return the number of clones the entry should be updated to.
 int countDuplicates(map[str, int] subtreeBucket, str hashedSubtree) {
     if (hashedSubtree in subtreeBucket) {
-        if (subtreeBucket[hashedSubtree] == 0) {
-            return 2;
-        }
+        if (subtreeBucket[hashedSubtree] == 0) { return 2; }
         return subtreeBucket[hashedSubtree] + 1;
     }
     return 0;
