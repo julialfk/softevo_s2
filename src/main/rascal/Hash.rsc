@@ -599,6 +599,15 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         }
     }
 
+
+    list[loc] location = [];
+    map[str, value] nodeKeywordParameters = getKeywordParameters(n);
+    if(size(nodeKeywordParameters) > 0 && "src" in nodeKeywordParameters) {
+        location = [nodeKeywordParameters["src"]];
+    }
+    hash = md5Hash(hashInput);
+
+
     // Also add subsequences within code blocks to the hash map.
     if (!isEmpty(lines)) {
         hm = lineSubsequences(lines, cloneType, hm, massThreshold, location);
