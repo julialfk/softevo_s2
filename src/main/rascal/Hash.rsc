@@ -17,9 +17,9 @@ import HashMapp;
 // the parent node. All children of children should be included,
 // since we do not want variable nodes missing from a statement,
 // or a missing statement from a block, for example.
-tuple[tuple[list[str] tree, str childHash, int weight] subtree, map[str hash, tuple[int weight, list[loc] locations] values] hm]
+tuple[tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subtreeInfo, map[str hash, tuple[int weight, list[loc] locations] values] hm]
     getSubtree(str parentHash, node n, map[str, tuple[int, list[loc]]] hm, int massThreshold) {
-    tuple[list[str] tree, str childHash, int weight] subtree = <[parentHash], "", 1>;
+    tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subtreeInfo= <<[parentHash], 1>, []>;
     list[value] children = getChildren(n);
 
     list[loc] location = [];
@@ -35,49 +35,71 @@ tuple[tuple[list[str] tree, str childHash, int weight] subtree, map[str hash, tu
         switch (child) {
             // case list
             case list[value] c: nestedChildren += c;
-            case node c: subtree = getSubtreeChild(c, subtree, massThreshold);
+            case node c: subtree = getSubtreeChild(c, subtreeInfo, massThreshold);
         }
     }
-    for (node child <- nestedChildren) { subtree = getSubtreeChild(child, subtree, massThreshold);}
+    for (node child <- nestedChildren) { subtreeInfo = getSubtreeChild(child, subtreeInfo, massThreshold);}
 
-    return <subtree, updateHashMap(hm, subtree, massThreshold, location)>;
+    return <subtreeInfo, updateHashMap(hm, subtreeInfo, massThreshold, location)>;
 }
 
 
 // Extract the subtree from the child and update the subtree of the parent with the child subtree.
-tuple[list[str] subtree, str childHash, int weight] getSubtreeChild(node child, tuple[list[str] tree, str childHash, int weight] subtree, int massThreshold) {
+tuple[tuple[list[str] subtree, int weight] subtree, list[str] childHashes] getSubtreeChild(node child, tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] parentTree, int massThreshold) {
     childKeywords = getKeywordParameters(child);
-    if (childKeywords["hash"] == "") { return subtree; }
-    tuple[list[str] subtree, str childHash, int weight] subtreeChild = typeCast(#tuple[list[str], str, int], getKeywordParameters(child)["subtree"]);
+    if (childKeywords["hash"] == "") { return parentTree; }
+    tuple[list[str] subtree, int weight] subtreeChild = typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]);
     // create list of hashed children to pass to updateHashmap for possible deletion
-    str childHash = "";
+    list[str] childHash = [];
     if(subtreeChild.weight > massThreshold) {
-        childHash = md5Hash(subtreeChild.subtree);
+        childHash + md5Hash(subtreeChild.subtree);
     }
 
-    return <subtree.tree + subtreeChild.subtree, childHash, subtree.weight + subtreeChild.weight>;
+    return <<parentTree.subtree.tree + subtreeChild.subtree, parentTree.subtree.weight + subtreeChild.weight>, parentTree.childHashes + childHash>;
 }
+
+
+// Extract the subtree from a child node's keyword paramaters.
+tuple[list[str] subtree, int weight] getChildTree(node child) {
+    return(typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]));
+}
+
+
+// Extract the subtrees from a block of code.
+list[tuple[list[str] tree, int weight]] getLines(list[value] lines) {
+    list[tuple[list[str], int]] subtrees = [];
+    for (node line <- lines) { subtrees += [getChildTree(line)]; }
+    return subtrees;
+}
+
 
 // Creates a subtree representation of partial code blocks with subsequent lines.
 // E.g. a block of 3 lines will be transformed into a list of blocks:
 // [[0],[0,1],[0,1,2],[1],[1,2],[2]]
 // The first nChildren can be combined with the first lines/children of the parent.
-tuple[list[tuple[list[str] subtree, int weight]] subsequences, int nChildren]
-    lineSubsequences(list[tuple[list[str] tree, int weight]] subtrees) {
-    list[tuple[list[str], int]] result = [];
+map[str hash, tuple[int weight,list[loc] locations] values] lineSubsequences(list[value] lines,
+                        int cloneType,
+                        map[str hash, tuple[int weight,list[loc] locations] values] hm,
+                        int massThreshold,
+                        list[loc] location) {
+    list[tuple[list[str], int]] subtrees = [];
+    for (node line <- lines) { subtrees += [getChildTree(line)]; }
+
+    list[tuple[tuple[list[str], int], list[str]]] result = [];
     int len = size(subtrees);
 
     for (int i <- [0..len]) {
         for (int j <- [i..len]) {
-            tuple[list[str] tree, int weight] nextSubtree = <[],0>;
+            tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] nextSubtree = <<[],0>, []>;
             for (tuple[list[str] tree, int weight] subtree <- subtrees[i..j+1]) {
-                nextSubtree = <nextSubtree.tree + subtree.tree, nextSubtree.weight + subtree.weight>;
+                nextSubtree = <<nextSubtree.subtree.tree + subtree.tree, nextSubtree.subtree.weight + subtree.weight>, nextSubtree.childHashes>;
             }
             result += [nextSubtree];
+            hm = updateHashMap(hm, nextSubtree, massThreshold, location);
         }
     }
 
-    return <result, len>;
+    return hm;
 }
 
 
@@ -87,7 +109,8 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
     // iprintln(n);
     str hashInput = "";
     str hash = "";
-    map[list[str], int] subtrees = ();
+    // map[list[str], int] subtrees = ();
+    list[value] lines = [];
     // For children that are not in list form, need to find a way to always include those in subtree.
     switch (n) {
         // Declarations
@@ -101,6 +124,7 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
             hashInput = "enum1implements<size(implements)>constants<size(constants)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \enumConstant(str name, list[Expression] arguments, Declaration class): {
             hashInput = "enumConstant1arguments<size(arguments)>";
@@ -116,14 +140,17 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
             hashInput = "class1extends<size(extends)>implements<size(implements)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \class(list[Declaration] body): {
             hash = md5Hash("class2body<size(body)>");
+            lines = body;
         }
         case \interface(str name, list[Type] extends, list[Type] implements, list[Declaration] body): {
             hashInput = "interface1extends<size(extends)>implements<size(implements)>body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \field(Type \type, list[Expression] fragments): {
             hash = md5Hash("field1fragments<size(fragments)>");
@@ -173,6 +200,7 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
             hashInput = "annotationType1body<size(body)>";
             if (cloneType == 1) { hashInput = hashInput + name; }
             hash = md5Hash(hashInput);
+            lines = body;
         }
         case \annotationTypeMember(Type \type, str name): {
             hashInput = "annotationTypeMember1";
@@ -349,6 +377,7 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         }
         case \block(list[Statement] statements): {
             hash = md5Hash("block1statements<size(statements)>");
+            lines = statements;
         }
         case \break(): {
             hash = md5Hash("break1");
@@ -400,6 +429,7 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         }
         case \switch(Expression expression, list[Statement] statements): {
             hash = md5Hash("switch1statements<size(statements)>");
+            lines = statements;
         }
         case \case(Expression expression): {
             hash = md5Hash("case1");
@@ -542,7 +572,19 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
         }
     }
 
-    tuple[tuple[list[str] subtree, str childHash, int weight] subtree, map[str hash, tuple[int weight,list[loc] locations] values] hm] treeAndMap
+
+    list[loc] location = [];
+    map[str, value] nodeKeywordParameters = getKeywordParameters(n);
+    if(size(nodeKeywordParameters) > 0 && "src" in nodeKeywordParameters) {
+        location = [nodeKeywordParameters["src"]];
+    }
+
+    // Also add subsequences within code blocks to the hash map.
+    if (!isEmpty(lines)) {
+        hm = lineSubsequences(lines, cloneType, hm, massThreshold, location);
+    }
+
+    tuple[tuple[tuple[list[str] tree,int weight] subtree,list[str] childHash] subtreeInfo, map[str hash, tuple[int weight,list[loc] locations] values] hm] treeAndMap
         = getSubtree(hash, n, hm, massThreshold);
     // subtrees = ([hash]:1) + treesAndMap.subtrees;
 
@@ -554,7 +596,7 @@ tuple[node, map[str, tuple[int, list[loc]]]] calcNode(node n, int cloneType, map
     // iprintln(treesAndMap.hm);
 
     if (hash == "") {
-        return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": ())), treeAndMap.hm>);
+        return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": <[],0>)), treeAndMap.hm>);
     }
-    return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": treeAndMap.subtree)), treeAndMap.hm>);
+    return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": treeAndMap.subtreeInfo.subtree)), treeAndMap.hm>);
 }

@@ -5,6 +5,7 @@ import lang::java::m3::AST;
 import Node;
 import Hash;
 import List;
+
 // AST //
 public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonetype) {
     real result = 0.0;

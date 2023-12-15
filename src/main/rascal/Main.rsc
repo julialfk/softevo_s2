@@ -10,6 +10,7 @@ import String;
 
 int main(int testArgument=0) {
     loc projectLocation = |project://smallsql0.21_src|;
+    // loc projectLocation = |project://hsqldb-2.3.1|;
     datetime startTime = now();
     real blob = getASTduplication(getASTs(projectLocation), countLinesFile(projectLocation), 1);
     datetime endTime = now();
