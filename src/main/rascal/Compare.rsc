@@ -10,13 +10,12 @@ import Type;
 
 /*
     Similarity = 2 x S / (2 x S + L + R)
-            where:
-            S = number of shared nodes
-            L = number of different nodes in sub-tree 1
-            R = number of different nodes in sub-tree 2
+    where:
+        S = number of shared nodes
+        L = number of different nodes in sub-tree 1
+        R = number of different nodes in sub-tree 2
 */
 real calcSimilarity(node n1, node n2) {
-    // println("in calcSimilarity");
     list[str] subtree1 = typeCast(#tuple[list[str], int], getKeywordParameters(n1)["subtree"])[0];
     list[str] subtree2 = typeCast(#tuple[list[str], int], getKeywordParameters(n2)["subtree"])[0];
 

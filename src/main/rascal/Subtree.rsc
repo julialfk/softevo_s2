@@ -14,10 +14,6 @@ import HashMapp;
 
 // Form a subtree from the parent node and all children subtrees and
 // update the hashmap with the new subtree.
-// TODO: limit subtree search by only allowing the exclusion of children from
-// the parent node. All children of children should be included,
-// since we do not want variable nodes missing from a statement,
-// or a missing statement from a block, for example.
 tuple[tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subtreeInfo, map[str hash, tuple[int weight, list[loc] locations] values] hm]
     getSubtree(str parentHash, node n, map[str, tuple[int, list[loc]]] hm, int massThreshold, list[str] childHashes) {
     tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subtreeInfo = <<[parentHash], 1>, childHashes>;
@@ -34,7 +30,6 @@ tuple[tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subt
 
     for(child <- children) {
         switch (child) {
-            // case list
             case list[value] c: nestedChildren += c;
             case node c: subtreeInfo = getSubtreeChild(c, subtreeInfo, massThreshold);
         }
@@ -46,7 +41,8 @@ tuple[tuple[tuple[list[str] tree, int weight] subtree, list[str] childHash] subt
 
 
 // Extract the subtree from the child and update the subtree of the parent with the child subtree.
-tuple[tuple[list[str] subtree, int weight] subtree, list[str] children] getSubtreeChild(node child, tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] parentTree, int massThreshold) {
+tuple[tuple[list[str] subtree, int weight] subtree, list[str] children]
+    getSubtreeChild(node child, tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] parentTree, int massThreshold) {
     childKeywords = getKeywordParameters(child);
     if (childKeywords["hash"] == "") { return parentTree; }
     tuple[list[str] subtree, int weight] subtreeChild = typeCast(#tuple[list[str], int], getKeywordParameters(child)["subtree"]);

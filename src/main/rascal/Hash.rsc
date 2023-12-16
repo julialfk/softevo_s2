@@ -15,12 +15,8 @@ import Subtree;
 
 // Return the updated version of the node (with subtrees) and hashmap.
 tuple[node, map[str, value]] calcNode(node n, int cloneType, map[str, value] hm, int massThreshold, real simThreshold) {
-    // println("Node:");
     str hashInput = "";
-    // str hash = "";
-    // map[list[str], int] subtrees = ();
     list[value] lines = [];
-    // For children that are not in list form, need to find a way to always include those in subtree.
     switch (n) {
         // Declarations
         case \compilationUnit(list[Declaration] imports, list[Declaration] types): {
@@ -74,11 +70,13 @@ tuple[node, map[str, value]] calcNode(node n, int cloneType, map[str, value] hm,
             hashInput = "initializer1";
         }
         case \method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions, Statement impl): {
+            // iprintln(n);
             hashInput = "method1";
             if (cloneType == 1) { hashInput = hashInput + name; }
             if (cloneType == 1 || cloneType == 2) { hashInput += "parameters<size(parameters)>exceptions<size(exceptions)>"; }
         }
         case \method(Type \return, str name, list[Declaration] parameters, list[Expression] exceptions): {
+            // iprintln(n);
             hashInput = "method2";
             if (cloneType == 1) { hashInput = hashInput + name; }
             if (cloneType == 1 || cloneType == 2) { hashInput += "parameters<size(parameters)>exceptions<size(exceptions)>"; }
@@ -492,41 +490,31 @@ tuple[node, map[str, value]] calcNode(node n, int cloneType, map[str, value] hm,
         }
     }
 
-
-    // list[loc] location = [];
-    // map[str, value] nodeKeywordParameters = getKeywordParameters(n);
-    // if(size(nodeKeywordParameters) > 0 && "src" in nodeKeywordParameters) {
-    //     location = [nodeKeywordParameters["src"]];
-    // }
     hash = md5Hash(hashInput);
     if (hash == "") {
         return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": <[],0>)), hm>);
     }
 
-    if (cloneType == 1 || cloneType == 2) {
-        tuple[map[str, tuple[int, list[loc]]] hm, list[str] childHashes] blockUpdate = <(),[]>;
-        // Also add subsequences within code blocks to the hash map.
-        if (!isEmpty(lines)) {
-            blockUpdate = lineSubsequences(lines, cloneType, hm, massThreshold);
-            hm = blockUpdate.hm;
-        }
+    tuple[map[str, tuple[int, list[loc]]] hm, list[str] childHashes] blockUpdate = <(),[]>;
+    // Collect locations for the subsequences.
+    // list[loc] location = [];
+    // map[str, value] nodeKeywordParameters = getKeywordParameters(n);
+    // if(size(nodeKeywordParameters) > 0 && "src" in nodeKeywordParameters) {
+    //     location = [nodeKeywordParameters["src"]];
+    // }
 
-        tuple[tuple[tuple[list[str] tree,int weight] subtree,list[str] childHash] subtreeInfo, map[str hash, tuple[int weight,list[loc] locations] values] hm] treeAndMap
-            = getSubtree(hash, n, hm, massThreshold, blockUpdate.childHashes);
-        // subtrees = ([hash]:1) + treesAndMap.subtrees;
+    // Also add subsequences within code blocks to the hash map.
+    // if (!isEmpty(lines)) {
+    //     blockUpdate = lineSubsequences(lines, cloneType, hm, massThreshold);
+    //     hm = blockUpdate.hm;
+    // }
 
-        // println("Hash:");
-        // iprintln(hash);
-        // println("Subtrees:");
-        // iprintln(subtrees);
-        // println("\n");
-        // iprintln(treesAndMap.hm);
+    tuple[tuple[tuple[list[str] tree,int weight] subtree,list[str] childHash] subtreeInfo, map[str hash, tuple[int weight,list[loc] locations] values] hm] treeAndMap
+        = getSubtree(hash, n, hm, massThreshold, blockUpdate.childHashes);
 
-        return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": treeAndMap.subtreeInfo.subtree)), treeAndMap.hm>);
-    }
+    return(<setKeywordParameters(n, getKeywordParameters(n) + ("hash": hash) + ("subtree": treeAndMap.subtreeInfo.subtree)), treeAndMap.hm>);
 
-    <n,hm> = getSubtree3(hash, n, typeCast(#map[str, map[node, list[node]]], hm), massThreshold, simThreshold);
-    // iprintln(hm);
-    // iprintToFile(|project://lab2/output/output.txt|, n);
-    return(<n,hm>);
+    // Type III return.
+    // <n,hm> = getSubtree3(hash, n, typeCast(#map[str, map[node, list[node]]], hm), massThreshold, simThreshold);
+    // return(<n,hm>);
 }
