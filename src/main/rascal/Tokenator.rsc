@@ -177,7 +177,7 @@ list[tuple[str, list[loc]]] visitNode(node n, list[tuple[str, list[loc]]] file, 
         }
         case \package(str name): {
             map[str, value] nodeParams = getKeywordParameters(n);
-            if ("src" in nodeParams) {nodeSrc += [nodeParams["src"]];}
+            if ("src" in nodeParams) {nodeSrc += [nodeParams["src"]];} // Dit gaat niet goed
             file += <"__PACKAGE_<name>", nodeSrc>;
         }
         case \package(Declaration parentPackage, str name): {
@@ -185,7 +185,7 @@ list[tuple[str, list[loc]]] visitNode(node n, list[tuple[str, list[loc]]] file, 
             int lastLine = size(file) - 1;
             if (isEmpty(file[lastLine][1])) {
                 map[str, value] nodeParams = getKeywordParameters(n);
-                if ("src" in nodeParams) {nodeSrc += [nodeParams["src"]];}
+                if ("src" in nodeParams) {nodeSrc += [nodeParams["src"]];} // Dit gaat niet goed
             }
             file[lastLine][0] += ".<name>";
         }

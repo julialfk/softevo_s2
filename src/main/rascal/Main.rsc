@@ -12,10 +12,10 @@ int main(int testArgument=0) {
     loc projectLocation = |project://smallsql0.21_src|;
     // loc projectLocation = |project://hsqldb-2.3.1|;
     datetime startTime = now();
-    real blob = getASTduplication(getASTs(projectLocation), countLinesFile(projectLocation), 1);
+    real blob = getASTduplication(getASTs(projectLocation), countLinesFile(projectLocation), 3);
     datetime endTime = now();
     Duration i = endTime - startTime;
-    println("Clone lines over total lines: <blob>%");
+    // println("Clone lines over total lines: <blob>%");
     println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
     return testArgument;
 }

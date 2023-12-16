@@ -9,13 +9,14 @@ import Type;
 // import Lexer;
 
 // AST //
-public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonetype) {
-    real result = 0.0;
-    switch (clonetype) {
-        case 1: result = getASTtypeI(ASTs, totalLines);
-    }
-    return result;
-}
+// public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonetype) {
+//     real result = 0.0;
+//     switch (clonetype) {
+//         case 1: result = getASTtypeI(ASTs, totalLines);
+//         case 2: result = getASTtypeI()
+//     }
+//     return result;
+// }
 
 // Type I Pattern Recognition implementation //
 // This AST approach visits each node in a bottom-up fashion
@@ -26,62 +27,41 @@ public real getASTduplication(list[Declaration] ASTs, int totalLines, int clonet
 // it returns these subtrees as a hashed value in a list, which is then
 // added to the map of all hashed subtrees, if it's already in the list
 // the value of the hashkey is then incremented(?)
-private real getASTtypeI(list[Declaration] ASTs, int totalLines) {
+public real getASTduplication(list[Declaration] ASTs, int totalLines, int cloneType) {
     int massThreshold = 15;
-    // list[str] hashedsubtrees = [];
-    map[str hash, tuple[int clones, list[loc] locations] values] hm = ("": <0, []>);
-    list[list[tuple[str, list[loc]]]] files = [];
+    real simThreshold = 0.9;
+    hm = ();
+    if (cloneType == 1 || cloneType == 2) { hm = typeCast(#map[str, tuple[int, list[loc]]], hm); }
+    else { hm = typeCast(#map[str, map[node, list[node]]], hm); }
+    // list[list[tuple[str, list[loc]]]] files = [];
     for (ast <- ASTs) {
         // files += [visitNode(ast, [], 1)];
         bottom-up visit(ast) {
             case node n => {
-                tuple[node nNew, map[str hash, tuple[int clones, list[loc] locations] values] hmNew] result = calcNode(n, 1, hm, massThreshold);
-                hm = result.hmNew;
-                result.nNew;
+                <nNew, hm> = calcNode(n, cloneType, hm, massThreshold, simThreshold);
+                nNew;
             }
-        //         // println(n);
-        //         // println(getChildren(n));
-        //         // println(size(getChildren(n)));
-        //         // tuple[str hash, map[list[str], int] subtrees] newParameters = calcNode(n, 1);
-        //         // n = setKeywordParameters(n, getKeywordParameters(n) + ("hash": newParameters.hash) + ("subtrees": newParameters.subtrees));
-        //         // println(getKeywordParameters(n));
-        //         // println(getKeywordParameters(n));
-        //         // if (arity(n) == 0) {
-        //             // leaves don't have subtrees, skip asap
-        //             // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": 1));
-        //         // }
-        //         // else {
-        //             // tuple[int weight, list[str] subtrees] subtree = mapAllPossibilities(n, massThreshold);
-        //             // n = setKeywordParameters(n, getKeywordParameters(n) + ("weight": subtree.weight, "node": hashNode(n)));
-        //             // hashedsubtrees += subtree.subtrees;
-        //         // }
-        //         // list[value] children = getChildren(n);
-        //         // if (size(children) != arity(n)) {
-        //         //     println("children = <size(children)>\n");
-        //         //     println("arity = <arity(n)>\n");
-        //         //     println(getKeywordParameters(n));
-        //         // }
         }
         unsetRec(ast);
     }
 
-    int totalCloneLines = 0;
-    list[tuple[int clones, list[loc] locations] values] filt = [];
-    for(tuple[int clones, list[loc] locations] values <- hm.values) {
-        if(values.clones > 0) {
-            filt += [values];
-            for(loc l <- values.locations) {
-                totalCloneLines += (l.end.line - l.begin.line) + 1;
-            }
-        }
-    }
-    // iprintToFile(|project://lab2/output/output.txt|,files);
+    // int totalCloneLines = 0;
+    // list[tuple[int clones, list[loc] locations] values] filt = [];
+    // for(tuple[int clones, list[loc] locations] values <- hm.values) {
+    //     if(values.clones > 0) {
+    //         filt += [values];
+    //         for(loc l <- values.locations) {
+    //             totalCloneLines += (l.end.line - l.begin.line) + 1;
+    //         }
+    //     }
+    // }
+    iprintToFile(|project://lab2/output/output.txt|,hm);
 
-    iprintln(filt);
-    println("Total node clones: <size(filt)>");
-    println("Total cloneLines: <totalCloneLines>");
-    return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
-    // return 0.0;
+    // iprintln(filt);
+    // println("Total node clones: <size(filt)>");
+    // println("Total cloneLines: <totalCloneLines>");
+    // return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
+    return 0.0;
 }
 
 // Debug Scratch pad:
