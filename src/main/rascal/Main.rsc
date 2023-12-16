@@ -20,6 +20,16 @@ int main(int testArgument=0) {
     return testArgument;
 }
 
+int testast() {
+    loc projectLocation = |project://softevo_s2/test/javaproject|;
+    datetime startTime = now();
+    real blob = getASTduplication(getASTs(projectLocation), countLinesFile(projectLocation), 1);
+    datetime endTime = now();
+    Duration i = endTime - startTime;
+    println("Clone lines over total lines: <blob>%");
+    println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
+    return 0;
+}
 
 list[Declaration] getASTs(loc projectLocation) {
     M3 model = createM3FromMavenProject(projectLocation);
