@@ -35,7 +35,7 @@ tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound]
         tuple[int weight, list[loc] locations] values = hm[hashedSubtree];
         if (values.weight == 0) { hm[hashedSubtree] =  <2, values.locations + location>; }
         else { hm[hashedSubtree] = <values.weight + 1, values.locations + location>; }
-        hm = subtractSubclones(hm, subtreeInfo.childHashes);
+        hm = subsumptSubclones(hm, subtreeInfo.childHashes);
     } else {
         hm[hashedSubtree] =  <0, location>;
     }
@@ -44,7 +44,7 @@ tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound]
 
 
 // Remove previously counted children of clones from the hashmap.
-map[str, tuple[int, list[loc]]] subtractSubclones(map[str hash, tuple[int weight, list[loc] locations] values] hm,
+map[str, tuple[int, list[loc]]] subsumptSubclones(map[str hash, tuple[int weight, list[loc] locations] values] hm,
                                                     list[str] childHashes) {
     for (child <- childHashes) {
         if (child notin hm) { continue; }
@@ -61,16 +61,16 @@ map[str, tuple[int, list[loc]]] subtractSubclones(map[str hash, tuple[int weight
 }
 
 
-map[str, &T] updateHashMap3(map[str hashKey, &T values] hm, 
-                    node n,
-                    list[&T] children,
-                    int massThreshold,
-                    real simThreshold) {
+map[str, map[node, list[node]]] updateHashMap3(map[str hashKey, map[node, list[node]] values] hm, 
+                                                node n,
+                                                list[node] children,
+                                                int massThreshold,
+                                                real simThreshold) {
     if (typeCast(#tuple[list[str], int], getKeywordParameters(n)["subtree"])[1] < massThreshold) { return hm; }
 
     bool cloneFound = false;
     <hm, cloneFound> = add2HashMap(n, hm, simThreshold);
-    if (cloneFound) { hm = subtractSubclones3(n, children, hm); }
+    if (cloneFound) { hm = subsumptSubclones3(n, children, hm); }
     return hm;
 }
 
@@ -109,7 +109,7 @@ list[node] findClones(node n, str hashKey, map[str hashKey, map[node, list[node]
 
 
 // Remove the clone connection from the parent's and parent's clones' subtrees.
-map[str, map[node, list[node]]] subtractSubclones3(node parent, list[node] children, map[str, map[node, list[node]]] hm) {
+map[str, map[node, list[node]]] subsumptSubclones3(node parent, list[node] children, map[str, map[node, list[node]]] hm) {
     for (child <- children) {
         str hashKeyChild = typeCast(#str, getKeywordParameters(child)["hash"]);
         str hashKeyParent = typeCast(#str, getKeywordParameters(parent)["hash"]);

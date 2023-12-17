@@ -18,7 +18,7 @@ int main(int massThreshold, real simThreshold=0.0) {
     Duration i = endTime - startTime;
     println("Clone lines over total lines: <blob>%");
     println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
-    return testArgument;
+    return 0;
 }
 
 

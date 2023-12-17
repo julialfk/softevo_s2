@@ -57,16 +57,11 @@ public real getASTduplication(list[Declaration] ASTs,
            // For some reason, nodes found in the range of the bucket do not have a source,
            // while they do in the hashmap.
         // set[map[node, list[node]]] buckets = typeCast(#set[map[node, list[node]]], range(hm));
-        // iprintln(buckets);
         // for (bucket <- buckets) {
         //     for (cloneList <- range(bucket)) { clones += cloneList; }
         // }
         // set[node] clonesSet = toSet(clones);
 
-        // for (hashKey <- domain(hm)) {
-        //     println(hm[hashKey]);
-        //     clones += toSet(range(hm[hashKey]));
-        // }
     //     for (clone <- clones) {
     //         loc l = typeCast(#loc, getKeywordParameters(clone)["src"]);
     //         totalCloneLines += (l.end.line - l.begin.line) + 1;
