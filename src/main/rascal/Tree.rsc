@@ -2,6 +2,7 @@ module Tree
 
 import IO;
 import lang::java::m3::AST;
+import DateTime;
 import Node;
 import Hash;
 import List;
@@ -22,6 +23,8 @@ public real getASTduplication(list[Declaration] ASTs,
                                 int massThreshold,
                                 real simThreshold,
                                 loc projectLocation) {
+                                    
+    datetime startTime = now();
     map[str hash, tuple[int clones, list[loc] locations] values] hm = ();
 
     // Type III hashmap type
@@ -42,6 +45,9 @@ public real getASTduplication(list[Declaration] ASTs,
         unsetRec(ast);
     }
 
+    datetime endTime = now();
+    Duration i = endTime - startTime;
+    println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
     // if (cloneType == 3) {
     //     hm = typeCast(#map[str, map[node, list[node]]], hm);
     //     list[node] clones = [];
@@ -89,7 +95,7 @@ public real getASTduplication(list[Declaration] ASTs,
     // iprintToFile(projectLocation + "output/output.txt", bucketExamples);
 
     iprintln(filt);
-    println("Total clones: <size(filt)>");
+    println("Total clone classes: <size(filt)>");
     println("Total cloneLines: <totalCloneLines>");
     println("Total lines: <totalLines>");
     return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
