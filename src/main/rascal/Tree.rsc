@@ -127,6 +127,9 @@ private int printReport(loc projectLocation, map[str hash, tuple[int clones, lis
         }
     }
     
+    // The following line prints the detected clones to check the precision and recall against the benchmark
+    // iprint(filt);
+    
     iprintToFile(projectLocation + "output/AST_cloneDetection_report_cloneType<cloneType>.txt", (
         "clonePercentage": "<(totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0>%",
         "numberOfClones": numberOfClones,
