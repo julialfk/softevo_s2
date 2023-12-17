@@ -18,7 +18,6 @@ import Type;
 // added to the map of all hashed subtrees, if it's already in the list
 // the value of the hashkey is then incremented(?)
 public real getASTduplication(list[Declaration] ASTs,
-                                int totalLines,
                                 int cloneType,
                                 int massThreshold,
                                 real simThreshold,
@@ -74,11 +73,15 @@ public real getASTduplication(list[Declaration] ASTs,
     // TODO: also report biggest clone class (weight & lines), clone examples and
     // print a list of locations (one for each bucket) to output file.
     int totalCloneLines = 0;
+    int totalLines = 0;
     list[tuple[int clones, list[loc] locations] values] filt = [];
     for(tuple[int clones, list[loc] locations] values <- hm.values) {
         if(values.clones > 0) {
             filt += [values];
-            for(loc l <- values.locations) {
+        }
+        for(loc l <- values.locations) {
+            totalLines += (l.end.line - l.begin.line) + 1;
+            if(values.clones > 0) {
                 totalCloneLines += (l.end.line - l.begin.line) + 1;
             }
         }
@@ -86,7 +89,8 @@ public real getASTduplication(list[Declaration] ASTs,
     // iprintToFile(projectLocation + "output/output.txt", bucketExamples);
 
     iprintln(filt);
-    println("Total node clones: <size(filt)>");
+    println("Total clones: <size(filt)>");
     println("Total cloneLines: <totalCloneLines>");
+    println("Total lines: <totalLines>");
     return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
 }
