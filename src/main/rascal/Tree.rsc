@@ -81,6 +81,8 @@ public int getASTduplication(list[Declaration] ASTs,
     // }
 
     if (secondAlg) {
+        // Reformatting the files, since the traversal also returns locations,
+        // but we did not have enough time to use the locations to report the biggest clones etc.
         list[list[str]] filesWithoutLoc = [ [ line[0] | line <- file ] | list[tuple[str,list[loc]]] file <- files];
         int totalLines = size(concat(filesWithoutLoc));
         return countDuplicates(filesWithoutLoc, totalLines);
