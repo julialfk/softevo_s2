@@ -119,6 +119,8 @@ tuple[map[str hash, tuple[int weight,list[loc] locations] values] hm, list[str] 
 }
 
 
+// Form a subtree from the parent node and all children subtrees and
+// update the hashmap with the new subtree.
 tuple[node n, map[str hashKey, &T values] hm]
     getSubtree3(str parentHash, node n, map[str, &T] hm, int massThreshold, real simThreshold) {
     tuple[tuple[list[str] tree, int weight] subtree, list[node] children] subtreeInfo = <<[parentHash], 1>, []>;

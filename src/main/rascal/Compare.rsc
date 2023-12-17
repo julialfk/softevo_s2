@@ -8,13 +8,15 @@ import List;
 import Set;
 import Type;
 
-/*
-    Similarity = 2 x S / (2 x S + L + R)
-    where:
-        S = number of shared nodes
-        L = number of different nodes in sub-tree 1
-        R = number of different nodes in sub-tree 2
-*/
+
+// Calculate the similarity of two subtrees for Type III clones
+// Based on the paper from Baxter et al.
+
+// Similarity = 2 x S / (2 x S + L + R)
+// where:
+//     S = number of shared nodes
+//     L = number of different nodes in sub-tree 1
+//     R = number of different nodes in sub-tree 2
 real calcSimilarity(node n1, node n2) {
     list[str] subtree1 = typeCast(#tuple[list[str], int], getKeywordParameters(n1)["subtree"])[0];
     list[str] subtree2 = typeCast(#tuple[list[str], int], getKeywordParameters(n2)["subtree"])[0];

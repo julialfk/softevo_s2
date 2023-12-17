@@ -8,8 +8,9 @@ import Node;
 import List;
 
 
+// Traversal function for AST tokenization clone detection.
+// Updates the file with new tokens.
 list[tuple[str, list[loc]]] visitNode(node n, list[tuple[str, list[loc]]] file, int cloneType) {
-    // iprintln(n);
     list[loc] nodeSrc = [];
     switch (n) {
         // Declarations

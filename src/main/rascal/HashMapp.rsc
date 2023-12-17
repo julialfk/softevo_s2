@@ -16,9 +16,7 @@ import Compare;
 // Uses the hashed form of subtrees to minimize memory usage and comparison time.
 
 // Hashmap format:
-// hashed root node:
-//     hashed subtree: #duplicate occurences subtree
-// map[str, int]hm = updateHashMap(("nodea", 1), <["nodea"], 1>, 1, 3)
+// hashed subtree: <#duplicate occurences subtree, [locations]>
 tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound]
     updateHashMap(map[str hash, tuple[int weight, list[loc] locations] values] hm,
                     tuple[tuple[list[str] tree, int weight] subtree, list[str] childHashes] subtreeInfo,
@@ -61,6 +59,11 @@ map[str, tuple[int, list[loc]]] subsumptSubclones(map[str hash, tuple[int weight
 }
 
 
+// Type III hashmapp
+// Update the hashmap with the new subtree and subsumpt its child trees.
+
+// Hashmap format:
+// hashed root node: <root node, [root nodes of clones]>
 map[str, map[node, list[node]]] updateHashMap3(map[str hashKey, map[node, list[node]] values] hm, 
                                                 node n,
                                                 list[node] children,
@@ -75,6 +78,8 @@ map[str, map[node, list[node]]] updateHashMap3(map[str hashKey, map[node, list[n
 }
 
 
+// For a given subtree, update its clones if it is identified as a clone.
+// Otherwise, add the subtree as a new entry to the hash map.
 tuple[map[str, map[node, list[node]]] hm, bool cloneFound]
     add2HashMap(node n, map[str hashKey, map[node, list[node]] values] hm, real simThreshold) {
     tuple[list[str] tree, int weight] subtreeInfo = typeCast(#tuple[list[str], int], getKeywordParameters(n)["subtree"]);
@@ -93,6 +98,7 @@ tuple[map[str, map[node, list[node]]] hm, bool cloneFound]
 }
 
 
+// Check the bucket for clones for a given subtree.
 list[node] findClones(node n, str hashKey, map[str hashKey, map[node, list[node]] values] hm, real simThreshold) {
     set[node] potentialClones = domain(hm[hashKey]);
     list[node] clones = [];
