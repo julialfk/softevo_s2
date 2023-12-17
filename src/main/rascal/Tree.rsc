@@ -6,7 +6,8 @@ import Node;
 import Hash;
 import List;
 import Type;
-// import Lexer;
+import Tokenator;
+import Duplication;
 
 // Type I Pattern Recognition implementation //
 // This AST approach visits each node in a bottom-up fashion
@@ -22,25 +23,27 @@ public real getASTduplication(list[Declaration] ASTs,
                                 int cloneType,
                                 int massThreshold,
                                 real simThreshold,
-                                loc projectLocation) {
+                                loc projectLocation,
+                                bool secondAlg) {
     map[str hash, tuple[int clones, list[loc] locations] values] hm = ();
 
     // Type III hashmap type
     // map[str, map[node, list[node]]] hm = ();
 
     // List representation for tokenized files.
-    // list[list[tuple[str, list[loc]]]] files = [];
+    list[list[tuple[str, list[loc]]]] files = [];
     for (ast <- ASTs) {
         // Tokenization traversal
-        // files += [visitNode(ast, [], 1)];
-
-        bottom-up visit(ast) {
-            case node n => {
-                <nNew, hm> = calcNode(n, cloneType, hm, massThreshold, simThreshold);
-                nNew;
+        if (secondAlg) { files += [visitNode(ast, [], cloneType)]; }
+        else {
+            bottom-up visit(ast) {
+                case node n => {
+                    <nNew, hm> = calcNode(n, cloneType, hm, massThreshold, simThreshold);
+                    nNew;
+                }
             }
+            unsetRec(ast);
         }
-        unsetRec(ast);
     }
 
     // if (cloneType == 3) {
@@ -70,6 +73,12 @@ public real getASTduplication(list[Declaration] ASTs,
     //     println("Total cloneLines: <totalCloneLines>");
     //     return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
     // }
+
+    if (secondAlg) {
+        list[list[str]] filesWithoutLoc = [ [ line[0] | line <- file ] | list[tuple[str,list[loc]]] file <- files];
+        int totalLines = size(concat(filesWithoutLoc));
+        return countDuplicates(filesWithoutLoc, totalLines);
+    }
 
     // TODO: also report biggest clone class (weight & lines), clone examples and
     // print a list of locations (one for each bucket) to output file.

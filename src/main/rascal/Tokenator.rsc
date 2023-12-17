@@ -1,4 +1,4 @@
-module Lexer
+module Tokenator
 
 import IO;
 import lang::java::m3::Core;
