@@ -12,7 +12,7 @@ public class testA {
         return x + y;
     }
 
-    public int typeIIItestA(int a, int b) {
+    public int typeIIItest(int a, int b) {
         System.out.println("This line should not bother type III clone detection");
         return a * b;
     }

@@ -12,8 +12,21 @@ int main(int cloneType, int massThreshold, bool secondAlg, real simThreshold=0.0
     loc projectLocation = |project://smallsql0.21_src|;
     // loc projectLocation = |project://hsqldb-2.3.1|;
     datetime startTime = now();
-    real blob = getASTduplication(getASTs(projectLocation), countLinesFile(projectLocation),
-                                    cloneType, massThreshold, simThreshold, projectLocation, secondAlg);
+    real blob = getASTduplication(getASTs(projectLocation), cloneType,
+                                    massThreshold, simThreshold, projectLocation,
+                                    secondAlg);
+    datetime endTime = now();
+    Duration i = endTime - startTime;
+    println("Clone lines over total lines: <blob>%");
+    println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
+    return 0;
+}
+
+int benchmark(int massThreshold, int cloneType) {
+    loc projectLocation = |project://softevo_s2/test/javaproject|;
+    datetime startTime = now();
+    real blob = getASTduplication(getASTs(projectLocation),
+                                    cloneType, massThreshold, 0.0, projectLocation);
     datetime endTime = now();
     Duration i = endTime - startTime;
     println("Clone lines over total lines: <blob>%");
