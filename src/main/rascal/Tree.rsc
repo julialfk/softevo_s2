@@ -6,6 +6,7 @@ import DateTime;
 import Node;
 import Hash;
 import List;
+import Set;
 import Type;
 // import Lexer;
 
@@ -18,7 +19,7 @@ import Type;
 // it returns these subtrees as a hashed value in a list, which is then
 // added to the map of all hashed subtrees, if it's already in the list
 // the value of the hashkey is then incremented(?)
-public real getASTduplication(list[Declaration] ASTs,
+public int getASTduplication(list[Declaration] ASTs,
                                 int cloneType,
                                 int massThreshold,
                                 real simThreshold,
@@ -46,8 +47,8 @@ public real getASTduplication(list[Declaration] ASTs,
     }
 
     datetime endTime = now();
-    Duration i = endTime - startTime;
-    println("Time spent: <i.minutes>:<i.seconds>.<i.milliseconds> (mm:ss.SSS)");
+    Duration totalTime = endTime - startTime;
+    println("Time spent: <totalTime.minutes>:<totalTime.seconds>.<totalTime.milliseconds> (mm:ss.SSS)");
     // if (cloneType == 3) {
     //     hm = typeCast(#map[str, map[node, list[node]]], hm);
     //     list[node] clones = [];
@@ -76,27 +77,51 @@ public real getASTduplication(list[Declaration] ASTs,
     //     return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
     // }
 
-    // TODO: also report biggest clone class (weight & lines), clone examples and
-    // print a list of locations (one for each bucket) to output file.
-    int totalCloneLines = 0;
+    printReport(projectLocation, hm);
+
+    return 0;
+}
+
+// This function prints the results of the AST clone detection to file. The following information is printed:
+// clonePercentage, numberOfClones, numberOfCloneClasses. biggestClone, biggestCloneClass, exampleClones
+private int printReport(loc projectLocation, map[str hash, tuple[int clones, list[loc] locations] values] hm) {
     int totalLines = 0;
+    int totalCloneLines = 0;
+    int numberOfClones = 0;
+    int biggestCloneLines = 0;
+    // use the projectLocation as a placeholder to avoid NPE
+    tuple[int clones, list[loc] locations] biggestClone = <0, [projectLocation]>;
+    int biggestCloneClassSize = 0;
+    tuple[int clones, list[loc] locations] biggestCloneClass = <0, [projectLocation]>;
     list[tuple[int clones, list[loc] locations] values] filt = [];
     for(tuple[int clones, list[loc] locations] values <- hm.values) {
+        // for each clone class
         if(values.clones > 0) {
             filt += [values];
+            int currentLocationSize = size(values.locations);
+            if(currentLocationSize > biggestCloneClassSize) { biggestCloneClass = values; biggestCloneClassSize = currentLocationSize;}
+            numberOfClones+=currentLocationSize;
         }
+
+        // for each clone inside the clone class
         for(loc l <- values.locations) {
-            totalLines += (l.end.line - l.begin.line) + 1;
-            if(values.clones > 0) {
-                totalCloneLines += (l.end.line - l.begin.line) + 1;
+            int currentLines = (l.end.line - l.begin.line) + 1;
+            totalLines += currentLines;
+            if(values.clones > 0) { 
+                if(currentLines > biggestCloneLines) { biggestClone = values; biggestCloneLines = currentLines;}
+                totalCloneLines += currentLines;  
             }
         }
     }
-    // iprintToFile(projectLocation + "output/output.txt", bucketExamples);
+    
+    iprintToFile(projectLocation + "output/AST_cloneDetection_report.txt", (
+        "clonePercentage": "<(totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0>%",
+        "numberOfClones": numberOfClones,
+        "numberOfCloneClasses": size(filt),
+        "biggestClone": biggestClone,
+        "biggestCloneClass": biggestCloneClass,
+        "exampleClones": getOneFrom(filt).locations
+        ));
 
-    iprintln(filt);
-    println("Total clone classes: <size(filt)>");
-    println("Total cloneLines: <totalCloneLines>");
-    println("Total lines: <totalLines>");
-    return (totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0;
+    return 0;
 }

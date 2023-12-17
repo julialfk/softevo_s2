@@ -1,6 +1,6 @@
 public class cloneTypeTestClone {
     cloneTypeTestClone() {
-        //empty constructor
+        // empty constructor
     }
 
     public int typeItest(int a, int b) {
@@ -16,35 +16,23 @@ public class cloneTypeTestClone {
     }
 
     private void subsumptionTest() {
-        y=2;
-        a=1;
-        b=2;
-        c=3;
-        i=5;
+        y = 2;
+        a = 1;
+        b = 2;
+        c = 3;
+        i = 5;
     }
 
     // Subsequence test accomodated for m3 AST structure.
     private void subsequenceM3Test() {
-        y=0;
-        a=0;
-        b=0;
-        c=0;
-        i=0;
-
-        if(y == 0) {
+        x = 0;
+        if (d > 2) {
+            y = 1;
+            z = 2;
+        } else {
+            h = 3;
+            z = 1;
             y = 2;
-        }
-        if(a == 0) {
-            a = 1;
-        }
-        if(b == 0) {
-            b = 2;
-        }
-        if(c == 0) {
-            c = 3;
-        }
-        if(i == 0) {
-            i = 5;
         }
     }
 }
