@@ -88,17 +88,16 @@ public int getASTduplication(list[Declaration] ASTs,
         return countDuplicates(filesWithoutLoc, totalLines);
     }
 
-    printReport(projectLocation, hm);
+    printReport(projectLocation, hm, cloneType);
 
     return 0;
 }
 
 // This function prints the results of the AST clone detection to file. The following information is printed:
 // clonePercentage, numberOfClones, numberOfCloneClasses. biggestClone, biggestCloneClass, exampleClones
-private int printReport(loc projectLocation, map[str hash, tuple[int clones, list[loc] locations] values] hm) {
+private int printReport(loc projectLocation, map[str hash, tuple[int clones, list[loc] locations] values] hm, int cloneType) {
     // TODO: also report biggest clone class (weight & lines), clone examples and
     // print a list of locations (one for each bucket) to output file.
-    int totalCloneLines = 0;
     int totalLines = 0;
     int totalCloneLines = 0;
     int numberOfClones = 0;
@@ -128,7 +127,7 @@ private int printReport(loc projectLocation, map[str hash, tuple[int clones, lis
         }
     }
     
-    iprintToFile(projectLocation + "output/AST_cloneDetection_report.txt", (
+    iprintToFile(projectLocation + "output/AST_cloneDetection_report_cloneType<cloneType>.txt", (
         "clonePercentage": "<(totalCloneLines  * 1.0 / totalLines * 1.0) * 100.0>%",
         "numberOfClones": numberOfClones,
         "numberOfCloneClasses": size(filt),

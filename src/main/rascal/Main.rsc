@@ -17,7 +17,7 @@ int main(int cloneType, int massThreshold, bool secondAlg, real simThreshold=0.0
 }
 
 int benchmark(int cloneType, int massThreshold, bool secondAlg) {
-    loc projectLocation = |project://lab2/benchmark/javaproject|;
+    loc projectLocation = |project://softevo_s2/benchmark|;
     return getASTduplication(getASTs(projectLocation), cloneType,
                                     massThreshold, 0.0, projectLocation,
                                     secondAlg);
