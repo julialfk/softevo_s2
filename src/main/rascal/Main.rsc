@@ -17,10 +17,11 @@ int main(int cloneType, int massThreshold, bool secondAlg, real simThreshold=0.0
     return 0;
 }
 
-int benchmark(int massThreshold, int cloneType) {
-    loc projectLocation = |project://softevo_s2/benchmark/javaproject|;
-    real resultPercentage = getASTduplication(getASTs(projectLocation),
-                                    cloneType, massThreshold, 0.0, projectLocation);
+int benchmark(int cloneType, int massThreshold, bool secondAlg) {
+    loc projectLocation = |project://lab2/benchmark/javaproject|;
+    real resultPercentage = getASTduplication(getASTs(projectLocation), cloneType,
+                                    massThreshold, 0.0, projectLocation,
+                                    secondAlg);
     println("Clone lines over total lines: <resultPercentage>%");
     return 0;
 }
