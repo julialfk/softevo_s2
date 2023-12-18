@@ -116,10 +116,12 @@ private int printReport(loc projectLocation, map[str hash, tuple[int clones, lis
             if(currentLocationSize > biggestCloneClassSize) { biggestCloneClass = values; biggestCloneClassSize = currentLocationSize;}
             numberOfClones+=currentLocationSize;
             // calculate the total clone lines
-            loc l = getOneFrom(values.locations);
-            int currentCloneLines = ((l.end.line - l.begin.line) + 1) * currentLocationSize;
-            if(currentCloneLines > biggestCloneLines) { biggestClone = values; biggestCloneLines = currentCloneLines;}
-            totalCloneLines += currentCloneLines;  
+            if(size(values.locations) > 0) {
+                loc l = getOneFrom(values.locations);
+                int currentCloneLines = ((l.end.line - l.begin.line) + 1) * currentLocationSize;
+                if(currentCloneLines > biggestCloneLines) { biggestClone = values; biggestCloneLines = currentCloneLines;}
+                totalCloneLines += currentCloneLines;  
+            }
         }
     }
 

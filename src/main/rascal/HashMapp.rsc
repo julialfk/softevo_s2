@@ -26,6 +26,8 @@ tuple[map[str, tuple[int, list[loc]]] hm, bool cloneFound]
         return <hm, false>;
     }
 
+    iprintln("Amount of nodes: <size(subtreeInfo.subtree.tree)>");
+
     bool cloneFound = false;
     str hashedSubtree = md5Hash(subtreeInfo.subtree.tree);
     if (hashedSubtree in hm) {

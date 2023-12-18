@@ -10,8 +10,8 @@ import Tree;
 
 
 int main(int cloneType, int massThreshold, bool secondAlg, real simThreshold=0.0) {
-    // loc projectLocation = |project://smallsql0.21_src|;
-    loc projectLocation = |project://hsqldb-2.3.1|;
+    loc projectLocation = |project://smallsql0.21_src|;
+    // loc projectLocation = |project://hsqldb-2.3.1|;
     int totalLines = size(concat((getProjectLines(projectLocation))));
     return getASTduplication(getASTs(projectLocation), totalLines, cloneType,
                                     massThreshold, simThreshold, projectLocation,
